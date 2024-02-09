@@ -1,6 +1,6 @@
-import CreateRecipeFormDialog from "@/module/CreateRecipeFormDialog";
+import CreateRecipeFormDialog from '@/module/CreateRecipeFormDialog';
 
-import { Button } from "@/ui/button";
+import { Button } from '@/ui/button';
 
 export default function Home() {
   return (

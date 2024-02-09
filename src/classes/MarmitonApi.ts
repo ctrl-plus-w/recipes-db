@@ -1,25 +1,22 @@
-import { parse } from "node-html-parser";
-import { QueryData } from "@supabase/supabase-js";
+import { QueryData } from '@supabase/supabase-js';
+import axios from 'axios';
+import { parse } from 'node-html-parser';
 
-import axios from "axios";
+import supabase from '@/instance/database';
 
-import supabase from "@/instance/database";
+import { filterNotNull } from '@/util/array.util';
 
-import { filterNotNull } from "@/util/array.util";
-
-import { Tables } from "@/type/database-generated.types";
+import { Tables } from '@/type/database-generated.types';
 
 type RecipeCore = { title: string; url: string };
 
-const recipeWithIngredients = supabase
-  .from("recipe")
-  .select(`*, ingredient(*)`)
-  .limit(1)
-  .single();
+const recipeWithIngredients = supabase.from('recipe').select('*, ingredient(*)').limit(1).single();
 
 export type RecipeWithIngredients = QueryData<typeof recipeWithIngredients>;
 
 class Api {
+  constructor() {}
+
   /**
    * Retrieve a list of recipes
    * @param page The page number (pagination)
@@ -30,18 +27,18 @@ class Api {
 
     const doc = parse(res.data);
 
-    const cardsElements = doc.querySelectorAll(".recipe-card");
+    const cardsElements = doc.querySelectorAll('.recipe-card');
 
     return filterNotNull(
       cardsElements.map((cardElement) => {
-        const titleElement = cardElement.querySelector("h4.recipe-card__title");
-        const anchorElement = cardElement.querySelector("a.recipe-card-link");
+        const titleElement = cardElement.querySelector('h4.recipe-card__title');
+        const anchorElement = cardElement.querySelector('a.recipe-card-link');
 
         if (!titleElement || !anchorElement) return;
 
         return {
           title: titleElement.text.trim(),
-          url: anchorElement.attributes["href"],
+          url: anchorElement.attributes['href'],
         } satisfies RecipeCore;
       }),
     );
@@ -49,7 +46,7 @@ class Api {
 
   /**
    * Given a recipe, retrieve the detailed content of it (ingredients, steps, servings...)
-   * @param recipe The recipe
+   * @param url The marmiton recipe URL
    */
   static async getDetailedRecipe(url: string): Promise<RecipeWithIngredients> {
     const res = await axios.get(url);
@@ -59,54 +56,42 @@ class Api {
     // TODO: Add the images on the DetailedRecipe instance.
     // TODO: Add the preparation, waiting and cooking times.
 
-    const titleElement = doc.querySelector("h1");
+    const titleElement = doc.querySelector('h1');
     const title = titleElement?.text.trim();
 
     // Retrieve the ingredients from the elements
-    const ingredientsElements = doc.querySelectorAll(
-      ".mrtn-recette_ingredients-items .card-ingredient",
-    );
+    const ingredientsElements = doc.querySelectorAll('.mrtn-recette_ingredients-items .card-ingredient');
     const ingredients = filterNotNull(
       ingredientsElements.map((ingredientElement) => {
-        const nameElement = ingredientElement.querySelector(".ingredient-name");
-        const quantityCountElement = ingredientElement.querySelector(
-          ".card-ingredient-quantity span.count",
-        );
-        const quantityUnitElement = ingredientElement.querySelector(
-          ".card-ingredient-quantity span.unit",
-        );
+        const nameElement = ingredientElement.querySelector('.ingredient-name');
+        // const quantityCountElement = ingredientElement.querySelector('.card-ingredient-quantity span.count');
+        // const quantityUnitElement = ingredientElement.querySelector('.card-ingredient-quantity span.unit');
 
         if (!nameElement) return;
 
-        const count = quantityCountElement
-          ? parseInt(quantityCountElement.text)
-          : undefined;
-        const unit = quantityUnitElement?.text.trim() ?? null;
+        // const count = quantityCountElement ? parseInt(quantityCountElement.text) : undefined;
+        // const unit = quantityUnitElement?.text.trim() ?? null;
 
         return {
-          id: "",
+          id: '',
           name: nameElement.text.trim(),
           image: null,
           shelf_life: null,
           opened_shelf_life: null,
           created_at: new Date().toISOString(),
-        } satisfies Tables<"ingredients">;
+        } satisfies Tables<'ingredients'>;
       }),
     );
 
     // Retrieve the servings count from the element
-    const servingsInputElement = doc.querySelector(
-      ".mrtn-recette_ingredients-counter",
-    );
+    const servingsInputElement = doc.querySelector('.mrtn-recette_ingredients-counter');
     const servings =
-      servingsInputElement && "data-servingsnb" in servingsInputElement.attrs
-        ? parseInt(servingsInputElement.attrs["data-servingsnb"])
+      servingsInputElement && 'data-servingsnb' in servingsInputElement.attrs
+        ? parseInt(servingsInputElement.attrs['data-servingsnb'])
         : NaN;
 
     // Retrieve the list of the steps from the elements
-    const stepsElements = doc.querySelectorAll(
-      ".recipe-step-list .recipe-step-list__container > p",
-    );
+    const stepsElements = doc.querySelectorAll('.recipe-step-list .recipe-step-list__container > p');
     const steps = stepsElements.map((stepElement) => stepElement.text.trim());
 
     // Default values, yet to do
@@ -116,7 +101,7 @@ class Api {
     const cookingTime = 0;
 
     return {
-      id: "",
+      id: '',
       title,
       url,
       ingredients,

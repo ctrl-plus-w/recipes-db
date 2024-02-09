@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import z from "zod";
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import React, { useState } from 'react';
 
-import { HardDriveDownloadIcon, Loader2Icon } from "lucide-react";
+import { zodResolver } from '@hookform/resolvers/zod';
+import axios from 'axios';
+import { HardDriveDownloadIcon, Loader2Icon } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import z from 'zod';
 
 import {
   AlertDialog,
@@ -15,7 +15,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/ui/alert-dialog";
+} from '@/ui/alert-dialog';
+import { Button } from '@/ui/button';
 import {
   Form,
   FormControl,
@@ -26,11 +27,10 @@ import {
   FormMessage,
   NumberFormField,
   TextFormField,
-} from "@/ui/form";
-import { Button } from "@/ui/button";
-import { Input } from "@/ui/input";
-import { Textarea } from "@/ui/textarea";
-import { useToast } from "@/ui/use-toast";
+} from '@/ui/form';
+import { Input } from '@/ui/input';
+import { Textarea } from '@/ui/textarea';
+import { useToast } from '@/ui/use-toast';
 
 const formSchema = z.object({
   title: z.string().min(2).max(50),
@@ -43,10 +43,10 @@ const formSchema = z.object({
 });
 
 const defaultValues = {
-  title: "",
-  url: "",
+  title: '',
+  url: '',
   servings: 0,
-  steps: "",
+  steps: '',
   preparationTime: 0,
   waitingTime: 0,
   cookingTime: 0,
@@ -66,7 +66,7 @@ const CreateRecipeForm = ({ close }: IFormProps) => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    mode: "onChange",
+    mode: 'onChange',
     defaultValues,
   });
 
@@ -76,16 +76,16 @@ const CreateRecipeForm = ({ close }: IFormProps) => {
 
       const { url } = form.getValues();
 
-      const res = await axios.get("/api/marmiton/recipe-from-url", {
+      const res = await axios.get('/api/marmiton/recipe-from-url', {
         params: { url },
       });
 
-      form.setValue("title", res.data.title);
-      form.setValue("servings", res.data.servings);
-      form.setValue("preparationTime", res.data.preparationTime);
-      form.setValue("waitingTime", res.data.waitingTime);
-      form.setValue("cookingTime", res.data.cookingTime);
-      form.setValue("steps", res.data.steps.join("\n"));
+      form.setValue('title', res.data.title);
+      form.setValue('servings', res.data.servings);
+      form.setValue('preparationTime', res.data.preparationTime);
+      form.setValue('waitingTime', res.data.waitingTime);
+      form.setValue('cookingTime', res.data.cookingTime);
+      form.setValue('steps', res.data.steps.join('\n'));
     } catch (err) {
       toastError(err);
     } finally {
@@ -93,19 +93,25 @@ const CreateRecipeForm = ({ close }: IFormProps) => {
     }
   };
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  const onSubmit = async (_values: z.infer<typeof formSchema>) => {
+    // await supabase.from('recipes').insert({
+    //   title: values.title,
+    //   url: values.url,
+    //
+    //   servings: values.servings,
+    //   steps: values.steps.split(','),
+    //   image: null,
+    //
+    //   cookingTime: values.cookingTime,
+    //   waitingTime: values.waitingTime,
+    //   preparationTime: values.preparationTime,
+    // });
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <TextFormField
-          control={form.control}
-          name="title"
-          label="Titre de la recette"
-          placeholder="Boeuf bourgignon"
-        />
+        <TextFormField control={form.control} name="title" label="Titre de la recette" placeholder="Boeuf bourgignon" />
 
         <FormField
           control={form.control}
@@ -120,17 +126,9 @@ const CreateRecipeForm = ({ close }: IFormProps) => {
                     {...field}
                   />
                 </FormControl>
-                <Button
-                  disabled={!fieldState.isDirty || field.disabled}
-                  onClick={loadRecipeFromURL}
-                  type="button"
-                >
+                <Button disabled={!fieldState.isDirty || field.disabled} onClick={loadRecipeFromURL} type="button">
                   {isLoadingRecipeFromURL ? (
-                    <Loader2Icon
-                      width={18}
-                      height={18}
-                      className="animate-spin"
-                    />
+                    <Loader2Icon width={18} height={18} className="animate-spin" />
                   ) : (
                     <HardDriveDownloadIcon width={18} height={18} />
                   )}
@@ -142,30 +140,13 @@ const CreateRecipeForm = ({ close }: IFormProps) => {
         />
 
         <div className="flex items-center space-x-4">
-          <NumberFormField
-            label="Portions"
-            placeholder={1}
-            min={1}
-            name="servings"
-          />
-          <NumberFormField
-            label="Temps de préparation"
-            placeholder={0}
-            name="preparationTime"
-          />
+          <NumberFormField label="Portions" placeholder={1} min={1} name="servings" />
+          <NumberFormField label="Temps de préparation" placeholder={0} name="preparationTime" />
         </div>
 
         <div className="flex items-center space-x-4">
-          <NumberFormField
-            label="Temps d'attente"
-            placeholder={0}
-            name="waitingTime"
-          />
-          <NumberFormField
-            label="Temps de cuisson"
-            placeholder={0}
-            name="cookingTime"
-          />
+          <NumberFormField label="Temps d'attente" placeholder={0} name="waitingTime" />
+          <NumberFormField label="Temps de cuisson" placeholder={0} name="cookingTime" />
         </div>
 
         <FormField
@@ -177,9 +158,7 @@ const CreateRecipeForm = ({ close }: IFormProps) => {
               <FormControl>
                 <Textarea placeholder="Découpez en morceaux..." {...field} />
               </FormControl>
-              <FormDescription>
-                Pour chaque étape, faites un retour à la ligne.
-              </FormDescription>
+              <FormDescription>Pour chaque étape, faites un retour à la ligne.</FormDescription>
             </FormItem>
           )}
         />
@@ -188,10 +167,7 @@ const CreateRecipeForm = ({ close }: IFormProps) => {
           <Button variant="outline" type="button" onClick={close}>
             Cancel
           </Button>
-          <Button
-            type="submit"
-            disabled={!form.formState.isDirty || !form.formState.isValid}
-          >
+          <Button type="submit" disabled={!form.formState.isDirty || !form.formState.isValid}>
             Valider
           </Button>
         </div>
@@ -215,8 +191,8 @@ const CreateRecipeFormDialog = ({ children }: IProps) => {
         <AlertDialogHeader>
           <AlertDialogTitle>Formulaire de création de recette</AlertDialogTitle>
           <AlertDialogDescription>
-            Vous pouvez automatiser le remplissage des champs à partir de l'URL
-            en cliquant sur le bouton à droite du champ de celui-ci.
+            Vous pouvez automatiser le remplissage des champs à partir de l&apos;URL en cliquant sur le bouton à droite
+            du champ de celui-ci.
           </AlertDialogDescription>
         </AlertDialogHeader>
 

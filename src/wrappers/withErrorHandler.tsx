@@ -1,34 +1,22 @@
-import { NextApiHandler } from "next";
+import { ZodError } from 'zod';
 
-import ApiError from "@/class/ApiError";
+import ApiError from '@/class/ApiError';
 
-import { checkIsHTTPMethod } from "@/util/api.util";
-
-import HTTPMethod from "@/constant/HTTPMethod";
-import { ZodError } from "zod";
+type NextHandler = (req: Request) => Promise<void | Response>;
 
 /**
  * Next.js API Error Handler wrapper
- * @param handler The NextApiHandler route handle
- * @param method The allow method to access the route
+ * @param handler The Next.js route handler
  */
-const withErrorHandler = (
-  handler: NextApiHandler,
-  method?: HTTPMethod | HTTPMethod[],
-): NextApiHandler => {
-  return async (req, res) => {
+const withErrorHandler = (handler: NextHandler): NextHandler => {
+  return async (req) => {
     try {
-      if (method) checkIsHTTPMethod(method)(req);
-
-      return await handler(req, res);
+      return await handler(req);
     } catch (err) {
-      if (err instanceof ApiError)
-        return Response.json({ error: err.message }, { status: err.status });
+      if (err instanceof ApiError) return Response.json({ error: err.message }, { status: err.status });
+      if (err instanceof ZodError) return Response.json({ error: err.message }, { status: 400 });
 
-      if (err instanceof ZodError)
-        return Response.json({ error: err.message }, { status: 400 });
-
-      return Response.json({ error: "Server error." }, { status: 500 });
+      return Response.json({ error: 'Server error.' }, { status: 500 });
     }
   };
 };

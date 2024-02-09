@@ -1,4 +1,4 @@
-import {arrayToString} from '@/util/array.util';
+import { arrayToString } from '@/util/array.util';
 
 import HttpMethod from '@/constant/HTTPMethod';
 
