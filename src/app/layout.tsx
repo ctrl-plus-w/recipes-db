@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="container flex h-14 max-w-screen-2xl items-center">
             <div className="mr-4 hidden md:flex">
               <nav className="flex items-center gap-6 text-sm">
-                <a className="transition-colors hover:text-foreground/80 text-foreground/60" href="/">
+                <a className="transition-colors hover:text-foreground/80 text-foreground/60" href="/recipes">
                   Recettes
                 </a>
                 {/*<a className="transition-colors hover:text-foreground/80 text-foreground/60" href="/ingredients">*/}
