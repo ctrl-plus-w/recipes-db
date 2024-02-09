@@ -30,7 +30,9 @@ import {
 } from '@/ui/form';
 import { Input } from '@/ui/input';
 import { Textarea } from '@/ui/textarea';
-import { useToast } from '@/ui/use-toast';
+import { toast, useToast } from '@/ui/use-toast';
+
+import supabase from '@/instance/database';
 
 const formSchema = z.object({
   title: z.string().min(2).max(50),
@@ -62,7 +64,9 @@ interface IFormProps {
 
 const CreateRecipeForm = ({ close }: IFormProps) => {
   const { toastError } = useToast();
+
   const [isLoadingRecipeFromURL, setIsLoadingRecipeFromURL] = useState(false);
+  const [isSubmitLoading, setIsSubmitLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -86,6 +90,9 @@ const CreateRecipeForm = ({ close }: IFormProps) => {
       form.setValue('waitingTime', res.data.waitingTime);
       form.setValue('cookingTime', res.data.cookingTime);
       form.setValue('steps', res.data.steps.join('\n'));
+
+      // Trigger the form validation to update the submit button disability
+      await form.trigger();
     } catch (err) {
       toastError(err);
     } finally {
@@ -93,19 +100,40 @@ const CreateRecipeForm = ({ close }: IFormProps) => {
     }
   };
 
-  const onSubmit = async (_values: z.infer<typeof formSchema>) => {
-    // await supabase.from('recipes').insert({
-    //   title: values.title,
-    //   url: values.url,
-    //
-    //   servings: values.servings,
-    //   steps: values.steps.split(','),
-    //   image: null,
-    //
-    //   cookingTime: values.cookingTime,
-    //   waitingTime: values.waitingTime,
-    //   preparationTime: values.preparationTime,
-    // });
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      setIsSubmitLoading(true);
+
+      const { error } = await supabase.from('recipes').insert({
+        title: values.title,
+        url: values.url,
+
+        servings: values.servings,
+        steps: values.steps.split(','),
+        image: null,
+
+        cookingTime: values.cookingTime,
+        waitingTime: values.waitingTime,
+        preparationTime: values.preparationTime,
+      });
+      if (error) throw error;
+
+      toast({
+        title: 'La recette à été créé !',
+        description: (
+          <p>
+            <strong>{values.title}</strong> pour <strong>{values.servings}</strong> personnes.
+          </p>
+        ),
+      });
+
+      // Close the modal
+      close();
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setIsSubmitLoading(false);
+    }
   };
 
   return (
@@ -126,7 +154,11 @@ const CreateRecipeForm = ({ close }: IFormProps) => {
                     {...field}
                   />
                 </FormControl>
-                <Button disabled={!fieldState.isDirty || field.disabled} onClick={loadRecipeFromURL} type="button">
+                <Button
+                  disabled={!fieldState.isDirty || field.disabled || isLoadingRecipeFromURL}
+                  onClick={loadRecipeFromURL}
+                  type="button"
+                >
                   {isLoadingRecipeFromURL ? (
                     <Loader2Icon width={18} height={18} className="animate-spin" />
                   ) : (
@@ -167,8 +199,8 @@ const CreateRecipeForm = ({ close }: IFormProps) => {
           <Button variant="outline" type="button" onClick={close}>
             Cancel
           </Button>
-          <Button type="submit" disabled={!form.formState.isDirty || !form.formState.isValid}>
-            Valider
+          <Button type="submit" disabled={!form.formState.isDirty || !form.formState.isValid || isSubmitLoading}>
+            {isSubmitLoading ? 'Loading...' : 'Valider'}
           </Button>
         </div>
       </form>
