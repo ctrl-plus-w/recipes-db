@@ -38,7 +38,7 @@ export type Database = {
           image: string | null;
           preparationTime: number | null;
           servings: number;
-          steps: Json[];
+          steps: string[];
           title: string;
           url: string;
           waitingTime: number | null;
@@ -50,7 +50,7 @@ export type Database = {
           image?: string | null;
           preparationTime?: number | null;
           servings: number;
-          steps: Json[];
+          steps: string[];
           title: string;
           url: string;
           waitingTime?: number | null;
@@ -62,7 +62,7 @@ export type Database = {
           image?: string | null;
           preparationTime?: number | null;
           servings?: number;
-          steps?: Json[];
+          steps?: string[];
           title?: string;
           url?: string;
           waitingTime?: number | null;
