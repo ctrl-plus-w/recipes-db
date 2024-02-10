@@ -34,6 +34,7 @@ const FormField = <
 };
 
 interface ITextFormFieldProps {
+  className?: string;
   label: string;
   placeholder: string;
 }
@@ -42,6 +43,7 @@ const TextFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
+    className,
     control,
     name,
     label,
@@ -52,7 +54,7 @@ const TextFormField = <
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className={className}>
           <FormLabel>{label}</FormLabel>
           <FormControl>
             <Input placeholder={placeholder} {...field} />
@@ -65,6 +67,7 @@ const TextFormField = <
 };
 
 interface INumberFormFieldProps {
+  className?: string;
   label: string;
   placeholder: number;
 
@@ -76,6 +79,7 @@ const NumberFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
+    className,
     control,
     name,
     label,
@@ -88,7 +92,7 @@ const NumberFormField = <
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className={className}>
           <FormLabel>{label}</FormLabel>
           <FormControl>
             <Input

@@ -8,7 +8,7 @@ module.exports = {
     indent: ['error', 2, { SwitchCase: 1, offsetTernaryExpressions: true }],
     quotes: ['error', 'single', { avoidEscape: true }],
     semi: ['error', 'always'],
-    'no-console': ['error', { allow: ['error']}],
+    'no-console': ['error', { allow: ['error'] }],
     // 'no-restricted-imports': ['error', { patterns: [{ group: '.*', name: 'No relative imports' }] }],
 
     'linebreak-style': 'off',

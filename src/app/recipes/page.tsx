@@ -7,6 +7,8 @@ import supabase from '@/instance/database';
 
 import { Tables } from '@/type/database-generated.types';
 
+export const revalidate = 0;
+
 const getData = async (rawPage: unknown, rawPerPage: unknown): Promise<Tables<'recipes'>[]> => {
   try {
     const page = Math.max(1, typeof rawPage === 'string' ? parseInt(rawPage) ?? 1 : 1);
@@ -15,7 +17,7 @@ const getData = async (rawPage: unknown, rawPerPage: unknown): Promise<Tables<'r
     const from = (page - 1) * perPage;
     const to = page * perPage;
 
-    const { data } = await supabase.from('recipes').select('*', {}).range(from, to);
+    const { data } = await supabase.from('recipes').select('*').range(from, to);
     return data ?? [];
   } catch (err) {
     return [];

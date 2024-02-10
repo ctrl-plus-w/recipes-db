@@ -104,6 +104,8 @@ const CreateRecipeForm = ({ close }: IFormProps) => {
     try {
       setIsSubmitLoading(true);
 
+      // TODO : Check if the recipe has already been created (from the url)
+
       const { error } = await supabase.from('recipes').insert({
         title: values.title,
         url: values.url,
