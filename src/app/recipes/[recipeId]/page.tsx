@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { ChevronRightIcon, UsersRoundIcon } from 'lucide-react';
 
-import CreateIngredientForm from '@/module/CreateIngredientForm';
+import CreateIngredientForm from '@/module/create-ingredient-form';
 
 import { Badge } from '@/ui/badge';
 

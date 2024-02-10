@@ -1,5 +1,5 @@
-import CreateRecipeFormDialog from '@/module/CreateRecipeFormDialog';
-import RecipesDataTable from '@/module/RecipesDataTable';
+import CreateRecipeFormDialog from '@/module/create-recipe-form-dialog';
+import RecipeDataTable from '@/module/recipe-data-table';
 
 import { Button } from '@/ui/button';
 
@@ -38,7 +38,7 @@ const RecipesPage = async ({ searchParams = {} }: IProps) => {
         <Button variant="outline">Créer une recette</Button>
       </CreateRecipeFormDialog>
 
-      <RecipesDataTable recipes={data} />
+      <RecipeDataTable recipes={data} />
     </>
   );
 };

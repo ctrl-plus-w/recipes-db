@@ -30,7 +30,7 @@ interface IProps {
   recipes: Tables<'recipes'>[];
 }
 
-const RecipesDataTable = ({ recipes }: IProps) => {
+const RecipeDataTable = ({ recipes }: IProps) => {
   const table = useReactTable({
     data: recipes,
     columns,
@@ -84,4 +84,4 @@ const RecipesDataTable = ({ recipes }: IProps) => {
   );
 };
 
-export default RecipesDataTable;
+export default RecipeDataTable;
