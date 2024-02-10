@@ -63,7 +63,9 @@ const RecipePage = async ({ params: { recipeId } }: IProps) => {
 
       <h2 className="text-3xl">Ingrédients</h2>
 
-      <div className="flex gap-8 w-full">
+      <div className="flex flex-col gap-8 w-full">
+        <CreateIngredientForm recipe={recipe} />
+
         <div className="flex flex-col flex-grow flex-shrink-0">
           {recipe.ingredients.map((ingredient) => (
             <div className="py-1" key={ingredient.id}>
@@ -74,8 +76,6 @@ const RecipePage = async ({ params: { recipeId } }: IProps) => {
             </div>
           ))}
         </div>
-
-        <CreateIngredientForm recipe={recipe} />
       </div>
 
       <h2 className="text-3xl mt-8">Étapes</h2>

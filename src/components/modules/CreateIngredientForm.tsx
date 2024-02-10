@@ -49,6 +49,10 @@ const CreateIngredientForm = ({ recipe }: IProps) => {
     defaultValues,
   });
 
+  const onReset = () => {
+    form.reset();
+  };
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsSubmitLoading(true);
@@ -89,6 +93,7 @@ const CreateIngredientForm = ({ recipe }: IProps) => {
       });
 
       revalidatePath(`/recipes/${recipe.id}`);
+      form.reset();
     } catch (err) {
       toastError(err);
     } finally {
@@ -129,7 +134,7 @@ const CreateIngredientForm = ({ recipe }: IProps) => {
         </div>
 
         <div className="flex items-center justify-end space-x-4">
-          <Button variant="outline" type="button">
+          <Button variant="outline" type="button" onClick={onReset}>
             Réinitialiser
           </Button>
           <Button type="submit" disabled={!form.formState.isDirty || !form.formState.isValid || isSubmitLoading}>
