@@ -8,6 +8,7 @@ import { ChevronRightIcon, ExternalLinkIcon, HardDriveDownloadIcon, UsersRoundIc
 
 import CreateIngredientForm from '@/module/create-ingredient-form';
 import LoadOriginalIngredientsDialog from '@/module/load-original-ingredients-dialog';
+import UpdateIngredientFormDialog from '@/module/update-ingredient-form-dialog';
 
 import { Badge } from '@/ui/badge';
 
@@ -80,14 +81,21 @@ const RecipePage = async ({ params: { recipeId } }: IProps) => {
         <CreateIngredientForm recipe={recipe} />
 
         <div className="flex flex-col flex-grow flex-shrink-0">
-          {recipe.ingredients.map((ingredient) => (
-            <div className="py-1" key={ingredient.id}>
-              <p>{ingredient.name}</p>
-              <p className="text-white/70">
-                {ingredient.quantity ?? '-'} <span>{ingredient.quantity_unit}</span>
-              </p>
-            </div>
-          ))}
+          {recipe.ingredients
+            .sort((i1, i2) => {
+              if (i1.name == i2.name) return 0;
+              return i1.name > i2.name ? 1 : -1;
+            })
+            .map((ingredient) => (
+              <UpdateIngredientFormDialog recipe={recipe} ingredient={ingredient} key={ingredient.id}>
+                <button className="flex flex-col items-start py-1 hover:bg-neutral-800">
+                  <p>{ingredient.name}</p>
+                  <p className="text-white/70">
+                    {ingredient.quantity ?? '-'} <span>{ingredient.quantity_unit}</span>
+                  </p>
+                </button>
+              </UpdateIngredientFormDialog>
+            ))}
         </div>
       </div>
 
