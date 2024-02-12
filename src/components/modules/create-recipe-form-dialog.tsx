@@ -111,7 +111,7 @@ const CreateRecipeForm = ({ close }: IFormProps) => {
         url: values.url,
 
         servings: values.servings,
-        steps: values.steps.split(','),
+        steps: values.steps.split('\n'),
         image: null,
 
         cookingTime: values.cookingTime,
