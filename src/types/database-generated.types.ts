@@ -11,6 +11,7 @@ export type Database = {
           name: string;
           opened_shelf_life: number | null;
           shelf_life: number | null;
+          ts: unknown | null;
         };
         Insert: {
           created_at?: string;
@@ -19,6 +20,7 @@ export type Database = {
           name: string;
           opened_shelf_life?: number | null;
           shelf_life?: number | null;
+          ts?: unknown | null;
         };
         Update: {
           created_at?: string;
@@ -27,6 +29,7 @@ export type Database = {
           name?: string;
           opened_shelf_life?: number | null;
           shelf_life?: number | null;
+          ts?: unknown | null;
         };
         Relationships: [];
       };

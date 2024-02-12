@@ -1,18 +1,11 @@
-import { QueryData } from '@supabase/supabase-js';
 import axios from 'axios';
 import { parse } from 'node-html-parser';
 
-import supabase from '@/instance/database';
-
 import { filterNotNull } from '@/util/array.util';
 
-import { Tables } from '@/type/database-generated.types';
+import { RecipeWithWeightedIngredients, WeightedIngredient } from '@/type/database.types';
 
 type RecipeCore = { title: string; url: string };
-
-const recipeWithIngredients = supabase.from('recipe').select('*, ingredient(*)').limit(1).single();
-
-export type RecipeWithIngredients = QueryData<typeof recipeWithIngredients>;
 
 class Api {
   constructor() {}
@@ -48,7 +41,7 @@ class Api {
    * Given a recipe, retrieve the detailed content of it (ingredients, steps, servings...)
    * @param url The marmiton recipe URL
    */
-  static async getDetailedRecipe(url: string): Promise<RecipeWithIngredients> {
+  static async getDetailedRecipe(url: string): Promise<RecipeWithWeightedIngredients> {
     const res = await axios.get(url);
 
     const doc = parse(res.data);
@@ -57,29 +50,32 @@ class Api {
     // TODO: Add the preparation, waiting and cooking times.
 
     const titleElement = doc.querySelector('h1');
-    const title = titleElement?.text.trim();
+    const title = titleElement?.text.trim() ?? 'Unknown';
 
     // Retrieve the ingredients from the elements
     const ingredientsElements = doc.querySelectorAll('.mrtn-recette_ingredients-items .card-ingredient');
     const ingredients = filterNotNull(
-      ingredientsElements.map((ingredientElement) => {
+      ingredientsElements.map((ingredientElement, index) => {
         const nameElement = ingredientElement.querySelector('.ingredient-name');
-        // const quantityCountElement = ingredientElement.querySelector('.card-ingredient-quantity span.count');
-        // const quantityUnitElement = ingredientElement.querySelector('.card-ingredient-quantity span.unit');
+        const quantityCountElement = ingredientElement.querySelector('.card-ingredient-quantity span.count');
+        const quantityUnitElement = ingredientElement.querySelector('.card-ingredient-quantity span.unit');
 
         if (!nameElement) return;
 
-        // const count = quantityCountElement ? parseInt(quantityCountElement.text) : undefined;
-        // const unit = quantityUnitElement?.text.trim() ?? null;
+        const count = quantityCountElement ? parseInt(quantityCountElement.text) : null;
+        const unit = quantityUnitElement?.text.trim() ?? null;
 
         return {
-          id: '',
+          id: `ingredient-${index}`,
           name: nameElement.text.trim(),
           image: null,
+          quantity: count,
+          quantity_unit: unit,
           shelf_life: null,
           opened_shelf_life: null,
+          ts: null,
           created_at: new Date().toISOString(),
-        } satisfies Tables<'ingredients'>;
+        } satisfies WeightedIngredient;
       }),
     );
 
@@ -95,7 +91,6 @@ class Api {
     const steps = stepsElements.map((stepElement) => stepElement.text.trim());
 
     // Default values, yet to do
-    const images: string[] = [];
     const preparationTime = 0;
     const waitingTime = 0;
     const cookingTime = 0;
@@ -104,14 +99,15 @@ class Api {
       id: '',
       title,
       url,
-      ingredients,
       servings,
       steps,
-      images,
+      ingredients,
+      image: null,
       preparationTime,
       waitingTime,
       cookingTime,
-    } satisfies RecipeWithIngredients;
+      created_at: new Date().toISOString(),
+    } satisfies RecipeWithWeightedIngredients;
   }
 }
 

@@ -1,11 +1,13 @@
 import React from 'react';
 
+import { unstable_noStore as noStore } from 'next/cache';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-import { ChevronRightIcon, UsersRoundIcon } from 'lucide-react';
+import { ChevronRightIcon, ExternalLinkIcon, HardDriveDownloadIcon, UsersRoundIcon } from 'lucide-react';
 
 import CreateIngredientForm from '@/module/create-ingredient-form';
+import LoadOriginalIngredientsDialog from '@/module/load-original-ingredients-dialog';
 
 import { Badge } from '@/ui/badge';
 
@@ -20,6 +22,8 @@ interface IProps {
 }
 
 const getData = async (recipeId: string) => {
+  noStore();
+
   const { data: recipe, error: error1 } = await supabase.from('recipes').select('*').eq('id', recipeId).single();
   if (error1) return;
 
@@ -55,13 +59,22 @@ const RecipePage = async ({ params: { recipeId } }: IProps) => {
       </div>
 
       <div className="flex items-center gap-2 mb-3">
+        <Link href={recipe.url} target="_blank" className="mr-2">
+          <ExternalLinkIcon width={32} height={32} />
+        </Link>
         <h1 className="text-4xl">{recipe.title}</h1>
         <Badge className="text-md gap-1">
           {recipe.servings} <UsersRoundIcon strokeWidth={3} width={16} height={16} />
         </Badge>
       </div>
 
-      <h2 className="text-3xl">Ingrédients</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-3xl">Ingrédients</h2>
+
+        <LoadOriginalIngredientsDialog recipe={recipe}>
+          <HardDriveDownloadIcon className="cursor-pointer" />
+        </LoadOriginalIngredientsDialog>
+      </div>
 
       <div className="flex flex-col gap-8 w-full">
         <CreateIngredientForm recipe={recipe} />
