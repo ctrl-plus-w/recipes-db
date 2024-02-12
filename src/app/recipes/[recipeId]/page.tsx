@@ -84,7 +84,7 @@ const RecipePage = async ({ params: { recipeId } }: IProps) => {
             <div className="py-1" key={ingredient.id}>
               <p>{ingredient.name}</p>
               <p className="text-white/70">
-                {ingredient.quantity} <span>{ingredient.quantity_unit}</span>
+                {ingredient.quantity ?? '-'} <span>{ingredient.quantity_unit}</span>
               </p>
             </div>
           ))}
