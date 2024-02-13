@@ -121,27 +121,29 @@ const LoadOriginalIngredientsForm = ({ recipe, ingredientsWithAvailabilities }: 
   };
 
   return (
-    <form className={'flex flex-col gap-1'} onSubmit={onSubmit}>
-      {ingredientsWithAvailabilities.map(([ingredient, availableIngredients]) => (
-        <Ingredient
-          key={ingredient.id}
-          {...{
-            ingredient,
-            availableIngredients,
+    <form className="flex flex-col gap-1 h-full overflow-hidden" onSubmit={onSubmit}>
+      <div className="h-full overflow-scroll">
+        {ingredientsWithAvailabilities.map(([ingredient, availableIngredients]) => (
+          <Ingredient
+            key={ingredient.id}
+            {...{
+              ingredient,
+              availableIngredients,
 
-            mappedName: mappedNames[ingredient.id],
-            setMappedName: setMappedName(ingredient),
+              mappedName: mappedNames[ingredient.id],
+              setMappedName: setMappedName(ingredient),
 
-            isDisabled: isDisabledIds.includes(ingredient.id),
-            switchIsDisabled: switchIsDisabled(ingredient),
+              isDisabled: isDisabledIds.includes(ingredient.id),
+              switchIsDisabled: switchIsDisabled(ingredient),
 
-            isReplacedDisabled: isReplacementDisabledIds.includes(ingredient.id),
-            switchIsReplacedDisabled: switchIsReplaced(ingredient),
-          }}
-        />
-      ))}
+              isReplacedDisabled: isReplacementDisabledIds.includes(ingredient.id),
+              switchIsReplacedDisabled: switchIsReplaced(ingredient),
+            }}
+          />
+        ))}
+      </div>
 
-      <div className="flex justify-end gap-2 mt-4">
+      <div className="flex justify-end gap-2 mt-4 flex-shrink-0">
         <AlertDialogCancel type="button">Annuler</AlertDialogCancel>
         <AlertDialogAction asChild>
           <Button type="submit">{isLoading ? <Loader2Icon className="animate-spin" /> : 'Valider la création'}</Button>

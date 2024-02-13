@@ -52,7 +52,7 @@ const LoadOriginalIngredientsDialog = async ({ recipe, children }: IProps) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
-      <AlertDialogContent className="max-w-4xl">
+      <AlertDialogContent className="flex flex-col max-w-4xl max-h-[90vh]">
         <AlertDialogHeader>
           <AlertDialogTitle>Récupération des ingrédients sur marmiton</AlertDialogTitle>
           <AlertDialogDescription>La liste des ingrédients récupérés à partir du site marmiton.</AlertDialogDescription>
