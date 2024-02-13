@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 
+import { useRouter } from 'next/navigation';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { HardDriveDownloadIcon, Loader2Icon } from 'lucide-react';
@@ -64,6 +66,8 @@ interface IFormProps {
 
 const CreateRecipeForm = ({ close }: IFormProps) => {
   const { toastError } = useToast();
+
+  const router = useRouter();
 
   const [isLoadingRecipeFromURL, setIsLoadingRecipeFromURL] = useState(false);
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
@@ -131,6 +135,7 @@ const CreateRecipeForm = ({ close }: IFormProps) => {
 
       // Close the modal
       close();
+      router.refresh();
     } catch (err) {
       toastError(err);
     } finally {
