@@ -12,7 +12,6 @@ import LoadOriginalIngredientsDialog from '@/module/load-original-ingredients-di
 import UpdateIngredientFormDialog from '@/module/update-ingredient-form-dialog';
 
 import { Badge } from '@/ui/badge';
-import { Button } from '@/ui/button';
 
 import supabase from '@/instance/database';
 
