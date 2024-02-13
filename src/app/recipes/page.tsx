@@ -1,32 +1,11 @@
-import { unstable_noStore as noStore } from 'next/cache';
-
 import CreateRecipeFormDialog from '@/module/create-recipe-form-dialog';
 import RecipeDataTable from '@/module/recipe-data-table';
 
 import { Button } from '@/ui/button';
 
-import supabase from '@/instance/database';
-
-import { Tables } from '@/type/database-generated.types';
+import { getDataOfTable } from '@/util/supabase.util';
 
 export const revalidate = 0;
-
-const getData = async (rawPage: unknown, rawPerPage: unknown): Promise<Tables<'recipes'>[]> => {
-  try {
-    noStore();
-
-    const page = Math.max(1, typeof rawPage === 'string' ? parseInt(rawPage) ?? 1 : 1);
-    const perPage = Math.max(10, typeof rawPerPage === 'string' ? parseInt(rawPerPage) ?? 10 : 10);
-
-    const from = (page - 1) * perPage;
-    const to = page * perPage;
-
-    const { data } = await supabase.from('recipes').select('*').range(from, to);
-    return data ?? [];
-  } catch (err) {
-    return [];
-  }
-};
 
 interface IProps {
   params: { slug: string };
@@ -34,7 +13,7 @@ interface IProps {
 }
 
 const RecipesPage = async ({ searchParams = {} }: IProps) => {
-  const data = await getData(searchParams['page'], searchParams['perPage']);
+  const data = await getDataOfTable('recipes')(searchParams['page'], searchParams['perPage']);
 
   return (
     <>
