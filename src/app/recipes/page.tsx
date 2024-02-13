@@ -1,3 +1,5 @@
+import { unstable_noStore as noStore } from 'next/cache';
+
 import CreateRecipeFormDialog from '@/module/create-recipe-form-dialog';
 import RecipeDataTable from '@/module/recipe-data-table';
 
@@ -11,6 +13,8 @@ export const revalidate = 0;
 
 const getData = async (rawPage: unknown, rawPerPage: unknown): Promise<Tables<'recipes'>[]> => {
   try {
+    noStore();
+
     const page = Math.max(1, typeof rawPage === 'string' ? parseInt(rawPage) ?? 1 : 1);
     const perPage = Math.max(10, typeof rawPerPage === 'string' ? parseInt(rawPerPage) ?? 10 : 10);
 

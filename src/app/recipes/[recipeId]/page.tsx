@@ -4,13 +4,15 @@ import { unstable_noStore as noStore } from 'next/cache';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
-import { ChevronRightIcon, ExternalLinkIcon, HardDriveDownloadIcon, UsersRoundIcon } from 'lucide-react';
+import { ChevronRightIcon, ExternalLinkIcon, HardDriveDownloadIcon, TrashIcon, UsersRoundIcon } from 'lucide-react';
 
 import CreateIngredientForm from '@/module/create-ingredient-form';
+import DeleteRecipeDialog from '@/module/delete-recipe-dialog';
 import LoadOriginalIngredientsDialog from '@/module/load-original-ingredients-dialog';
 import UpdateIngredientFormDialog from '@/module/update-ingredient-form-dialog';
 
 import { Badge } from '@/ui/badge';
+import { Button } from '@/ui/button';
 
 import supabase from '@/instance/database';
 
@@ -59,7 +61,7 @@ const RecipePage = async ({ params: { recipeId } }: IProps) => {
         <p>{recipe.title}</p>
       </div>
 
-      <div className="flex items-center gap-2 mb-3">
+      <div className="w-full flex items-center gap-2 mb-3">
         <Link href={recipe.url} target="_blank" className="mr-2">
           <ExternalLinkIcon width={32} height={32} />
         </Link>
@@ -67,6 +69,12 @@ const RecipePage = async ({ params: { recipeId } }: IProps) => {
         <Badge className="text-md gap-1">
           {recipe.servings} <UsersRoundIcon strokeWidth={3} width={16} height={16} />
         </Badge>
+
+        <DeleteRecipeDialog recipe={recipe}>
+          <button className="group p-2 ml-auto">
+            <TrashIcon className="group-hover:text-neutral-300 transition-colors duration-300" />
+          </button>
+        </DeleteRecipeDialog>
       </div>
 
       <div className="flex items-center gap-2">
