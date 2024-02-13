@@ -1,6 +1,10 @@
 'use client';
 
-import React, { ChangeEventHandler, useMemo } from 'react';
+import React, { ChangeEventHandler, Dispatch, SetStateAction, useMemo } from 'react';
+
+import { RefreshCcwIcon } from 'lucide-react';
+
+import SearchIngredientDialog from '@/module/search-ingredient-dialog';
 
 import { Checkbox } from '@/ui/checkbox';
 import InvisibleInput from '@/ui/invisible-input';
@@ -13,6 +17,9 @@ import { Tables, WeightedIngredient } from '@/type/database.types';
 interface IProps {
   ingredient: WeightedIngredient;
   availableIngredients: Tables<'ingredients'>[];
+  setIngredientsWithAvailabilities: Dispatch<
+    SetStateAction<(readonly [WeightedIngredient, Tables<'ingredients'>[]])[]>
+  >;
 
   mappedName: string | undefined;
   setMappedName: (value: string) => void;
@@ -27,6 +34,7 @@ interface IProps {
 const Ingredient = ({
   ingredient,
   availableIngredients,
+  setIngredientsWithAvailabilities,
   switchIsReplacedDisabled,
   isReplacedDisabled,
   switchIsDisabled,
@@ -40,15 +48,39 @@ const Ingredient = ({
     setMappedName(event.target.value);
   };
 
+  const onReplaceIngredient = (ingredientToAddAsAvailable: Tables<'ingredients'>) => {
+    setIngredientsWithAvailabilities((ingredientsWithAvailabilities) => {
+      const index = ingredientsWithAvailabilities.findIndex(([_ingredient]) => _ingredient.id === ingredient.id);
+
+      const newIngredientsWithAvailabilities = [...ingredientsWithAvailabilities];
+      newIngredientsWithAvailabilities[index] = [ingredient, [ingredientToAddAsAvailable]];
+
+      return newIngredientsWithAvailabilities;
+    });
+  };
+
   return (
     <label
-      className="flex items-center justify-between py-1 hover:bg-neutral-900 transition-all duration-300 cursor-pointer"
+      className={cn(
+        'flex items-center justify-start py-1 gap-4',
+        'hover:bg-neutral-900 transition-all duration-300 cursor-pointer',
+        isDisabled && 'opacity-60',
+      )}
       key={ingredient.id}
       htmlFor={ingredient.id}
     >
-      <div
-        className={cn('flex flex-col transition-colors duration-300', isDisabled && 'opacity-60 pointer-events-none')}
-      >
+      <SearchIngredientDialog onIngredientClick={onReplaceIngredient}>
+        <button
+          className={cn(
+            'p-2 -ml-2 hover:text-neutral-300 transition-colors duration-300',
+            isDisabled && 'pointer-events-none',
+          )}
+        >
+          <RefreshCcwIcon />
+        </button>
+      </SearchIngredientDialog>
+
+      <div className={cn('flex flex-col transition-colors duration-300', isDisabled && 'pointer-events-none')}>
         <div className="flex items-center">
           <p>
             <strong>({ingredient.name})</strong>
@@ -74,7 +106,12 @@ const Ingredient = ({
         </p>
       </div>
 
-      <Checkbox checked={!isDisabled} onCheckedChange={() => switchIsDisabled()} id={ingredient.id} />
+      <Checkbox
+        className="ml-auto"
+        checked={!isDisabled}
+        onCheckedChange={() => switchIsDisabled()}
+        id={ingredient.id}
+      />
     </label>
   );
 };

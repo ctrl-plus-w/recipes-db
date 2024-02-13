@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Dispatch, FormEventHandler, SetStateAction, useState } from 'react';
+import React, { Dispatch, FormEventHandler, SetStateAction, useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -25,8 +25,13 @@ interface IProps {
   ingredientsWithAvailabilities: (readonly [WeightedIngredient, Tables<'ingredients'>[]])[];
 }
 
-const LoadOriginalIngredientsForm = ({ recipe, ingredientsWithAvailabilities }: IProps) => {
+const LoadOriginalIngredientsForm = ({
+  recipe,
+  ingredientsWithAvailabilities: _ingredientsWithAvailabilities,
+}: IProps) => {
   const { toastError } = useToast();
+
+  const [ingredientsWithAvailabilities, setIngredientsWithAvailabilities] = useState(_ingredientsWithAvailabilities);
 
   const router = useRouter();
 
@@ -35,6 +40,10 @@ const LoadOriginalIngredientsForm = ({ recipe, ingredientsWithAvailabilities }: 
   const [isReplacementDisabledIds, setIsReplacementDisabledIds] = useState<string[]>([]);
   const [isDisabledIds, setIsDisabledIds] = useState<string[]>([]);
   const [mappedNames, setMappedNames] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    setIngredientsWithAvailabilities(_ingredientsWithAvailabilities);
+  }, [_ingredientsWithAvailabilities]);
 
   const switchIsValue =
     (values: string[], setValues: Dispatch<SetStateAction<string[]>>) => (ingredient: WeightedIngredient) => () => {
@@ -129,6 +138,7 @@ const LoadOriginalIngredientsForm = ({ recipe, ingredientsWithAvailabilities }: 
             {...{
               ingredient,
               availableIngredients,
+              setIngredientsWithAvailabilities,
 
               mappedName: mappedNames[ingredient.id],
               setMappedName: setMappedName(ingredient),
