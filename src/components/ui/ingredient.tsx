@@ -60,14 +60,13 @@ const Ingredient = ({
   };
 
   return (
-    <label
+    <div
       className={cn(
         'flex items-center justify-start py-1 gap-4',
         'hover:bg-neutral-900 transition-all duration-300 cursor-pointer',
         isDisabled && 'opacity-60',
       )}
       key={ingredient.id}
-      htmlFor={ingredient.id}
     >
       <SearchIngredientDialog onIngredientClick={onReplaceIngredient}>
         <button
@@ -75,6 +74,7 @@ const Ingredient = ({
             'p-2 -ml-2 hover:text-neutral-300 transition-colors duration-300',
             isDisabled && 'pointer-events-none',
           )}
+          type="button"
         >
           <RefreshCcwIcon />
         </button>
@@ -112,7 +112,7 @@ const Ingredient = ({
         onCheckedChange={() => switchIsDisabled()}
         id={ingredient.id}
       />
-    </label>
+    </div>
   );
 };
 
