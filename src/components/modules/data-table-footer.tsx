@@ -12,12 +12,15 @@ interface IProps {
   page: number;
   perPage: number;
 
+  children?: React.ReactNode;
   className?: string;
 }
 
-const DataTableFooter = ({ className, page, perPage }: IProps) => {
+const DataTableFooter = ({ children, className, page, perPage }: IProps) => {
   return (
-    <div className={cn('flex items-center space-x-2', className)}>
+    <div className={cn('flex items-center justify-end space-x-2', className)}>
+      {children}
+
       <Button variant="outline" disabled={page <= 1} className="h-8 w-8 p-0" asChild>
         <Link href={`/ingredients?page=${page - 1}&perPage=${perPage}`}>
           <span className="sr-only">Go to previous page</span>
