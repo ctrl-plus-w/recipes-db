@@ -9,7 +9,7 @@ import { ChevronRightIcon, ExternalLinkIcon, HardDriveDownloadIcon, TrashIcon, U
 import CreateIngredientForm from '@/module/create-ingredient-form';
 import DeleteRecipeDialog from '@/module/delete-recipe-dialog';
 import LoadOriginalIngredientsDialog from '@/module/load-original-ingredients-dialog';
-import UpdateIngredientFormDialog from '@/module/update-ingredient-form-dialog';
+import UpdateRecipeIngredientFormDialog from '@/module/update-recipe-ingredient-form-dialog';
 
 import { Badge } from '@/ui/badge';
 
@@ -94,14 +94,14 @@ const RecipePage = async ({ params: { recipeId } }: IProps) => {
               return i1.name > i2.name ? 1 : -1;
             })
             .map((ingredient) => (
-              <UpdateIngredientFormDialog recipe={recipe} ingredient={ingredient} key={ingredient.id}>
+              <UpdateRecipeIngredientFormDialog recipe={recipe} ingredient={ingredient} key={ingredient.id}>
                 <button className="flex flex-col items-start py-1 hover:bg-neutral-800">
                   <p>{ingredient.name}</p>
                   <p className="text-white/70">
                     {ingredient.quantity ?? '-'} <span>{ingredient.quantity_unit}</span>
                   </p>
                 </button>
-              </UpdateIngredientFormDialog>
+              </UpdateRecipeIngredientFormDialog>
             ))}
         </div>
       </div>
