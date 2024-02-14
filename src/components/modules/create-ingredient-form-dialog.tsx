@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -21,8 +21,6 @@ import { toast, useToast } from '@/ui/use-toast';
 
 import supabase from '@/instance/database';
 
-import { Tables } from '@/type/database-generated.types';
-
 const formSchema = z.object({
   name: z.string().min(2).max(50),
   shelf_life: z.number().int().optional(),
@@ -36,19 +34,14 @@ const defaultValues = {
 };
 
 interface IProps {
-  isOpen: boolean;
-  setIsOpen: Dispatch<SetStateAction<boolean>>;
-
-  ingredient?: Tables<'ingredients'>;
   children?: React.ReactNode;
 }
 
 interface IFormProps {
-  ingredient: Tables<'ingredients'>;
   close: VoidFunction;
 }
 
-const UpdateIngredientForm = ({ ingredient, close }: IFormProps) => {
+const CreateIngredientForm = ({ close }: IFormProps) => {
   const { toastError } = useToast();
 
   const router = useRouter();
@@ -61,21 +54,15 @@ const UpdateIngredientForm = ({ ingredient, close }: IFormProps) => {
     defaultValues,
   });
 
-  useEffect(() => {
-    form.setValue('name', ingredient.name);
-    form.setValue('opened_shelf_life', ingredient.opened_shelf_life ?? undefined);
-    form.setValue('shelf_life', ingredient.shelf_life ?? undefined);
-  }, [ingredient]);
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsSubmitLoading(true);
 
+      // TODO : Check if the ingredient has already been created (from the url)
+
       const { error } = await supabase
         .from('ingredients')
-        .update({ name: values.name, shelf_life: values.shelf_life, opened_shelf_life: values.opened_shelf_life })
-        .eq('id', ingredient.id);
-
+        .insert({ name: values.name, shelf_life: values.shelf_life, opened_shelf_life: values.opened_shelf_life });
       if (error) throw error;
 
       toast({
@@ -120,7 +107,9 @@ const UpdateIngredientForm = ({ ingredient, close }: IFormProps) => {
   );
 };
 
-const UpdateIngredientFormDialog = ({ isOpen, setIsOpen, ingredient, children }: IProps) => {
+const CreateIngredientFormDialog = ({ children }: IProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const onOpenChange = (_isOpen: boolean) => {
     setIsOpen(_isOpen);
   };
@@ -131,14 +120,14 @@ const UpdateIngredientFormDialog = ({ isOpen, setIsOpen, ingredient, children }:
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Formulaire de modification d&apos;un ingrédient</AlertDialogTitle>
+          <AlertDialogTitle>Formulaire de création d&apos;ingrédient</AlertDialogTitle>
           {/*<AlertDialogDescription> </AlertDialogDescription>*/}
         </AlertDialogHeader>
 
-        {ingredient && <UpdateIngredientForm close={() => setIsOpen(false)} ingredient={ingredient} />}
+        <CreateIngredientForm close={() => setIsOpen(false)} />
       </AlertDialogContent>
     </AlertDialog>
   );
 };
 
-export default UpdateIngredientFormDialog;
+export default CreateIngredientFormDialog;

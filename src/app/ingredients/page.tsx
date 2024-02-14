@@ -1,8 +1,10 @@
+import CreateIngredientFormDialog from '@/module/create-ingredient-form-dialog';
 import IngredientsDataTable from '@/module/ingredient-data-table';
 
-import { getDataOfTable } from '@/util/supabase.util';
+import { Button } from '@/ui/button';
+import Search from '@/ui/search';
 
-export const revalidate = 0;
+import { getDataOfTable } from '@/util/supabase.util';
 
 interface IProps {
   params: {
@@ -14,13 +16,22 @@ interface IProps {
 }
 
 const RecipesPage = async ({ searchParams = {} }: IProps) => {
-  const { data, page, perPage } = await getDataOfTable('ingredients')(searchParams['page'], searchParams['perPage']);
+  const { data, page, perPage } = await getDataOfTable('ingredients')(
+    searchParams['page'],
+    searchParams['perPage'],
+    searchParams['search'],
+    'name',
+  );
 
   return (
     <>
-      {/*<CreateRecipeFormDialog>*/}
-      {/*  <Button variant="outline">Créer une recette</Button>*/}
-      {/*</CreateRecipeFormDialog>*/}
+      <div className="flex w-full gap-2">
+        <Search placeholder="Rechercher un ingrédient" />
+
+        <CreateIngredientFormDialog>
+          <Button variant="outline">Créer un ingrédient</Button>
+        </CreateIngredientFormDialog>
+      </div>
 
       <IngredientsDataTable ingredients={data} page={page} perPage={perPage} />
     </>

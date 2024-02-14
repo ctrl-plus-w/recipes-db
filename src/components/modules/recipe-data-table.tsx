@@ -1,6 +1,8 @@
 'use client';
 
-import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { useRouter } from 'next/navigation';
+
+import { getCoreRowModel, Row, useReactTable } from '@tanstack/react-table';
 import { ColumnDef } from '@tanstack/table-core';
 
 import DataTableFooter from '@/module/data-table-footer';
@@ -35,15 +37,23 @@ interface IProps {
 }
 
 const RecipeDataTable = ({ page, perPage, recipes }: IProps) => {
+  const router = useRouter();
+
   const table = useReactTable({
     data: recipes,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const onTableRowClick = (row: Row<Tables<'recipes'>>) => {
+    const data = row.original;
+
+    if (data && typeof data === 'object' && 'id' in data) router.push(`/recipes/${data.id}`);
+  };
+
   return (
     <div className="flex flex-col gap-4 w-full">
-      <DataTable table={table} />
+      <DataTable table={table} onTableRowClick={onTableRowClick} />
       <DataTableFooter page={page} perPage={perPage}></DataTableFooter>
     </div>
   );

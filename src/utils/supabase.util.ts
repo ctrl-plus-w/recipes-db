@@ -2,11 +2,11 @@ import { unstable_noStore as noStore } from 'next/dist/server/web/spec-extension
 
 import supabase from '@/instance/database';
 
-import { Database } from '@/type/database-generated.types';
+import { Database, Tables } from '@/type/database-generated.types';
 
 export const getDataOfTable =
-  <PublicTableNameOrOptions extends keyof Database['public']['Tables']>(table: PublicTableNameOrOptions) =>
-    async (rawPage: unknown, rawPerPage: unknown) => {
+  <TableName extends keyof Database['public']['Tables']>(table: TableName) =>
+    async (rawPage: unknown, rawPerPage: unknown, search?: unknown, column?: keyof Tables<TableName>) => {
       try {
         noStore();
 
@@ -16,7 +16,11 @@ export const getDataOfTable =
         const from = (page - 1) * perPage;
         const to = page * perPage;
 
-        const { data } = await supabase.from(table).select('*').range(from, to);
+        let req = supabase.from(table).select('*').range(from, to);
+
+        if (search && typeof search === 'string') req = req.textSearch(column as string, search);
+
+        const { data } = await req;
         return { data: data ?? [], page, perPage };
       } catch (err) {
         return { data: [], page: 1, perPage: 10 };

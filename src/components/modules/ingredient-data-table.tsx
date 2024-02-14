@@ -1,9 +1,12 @@
 'use client';
 
-import { getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { useState } from 'react';
+
+import { getCoreRowModel, Row, useReactTable } from '@tanstack/react-table';
 import { ColumnDef } from '@tanstack/table-core';
 
 import DataTableFooter from '@/module/data-table-footer';
+import UpdateIngredientFormDialog from '@/module/update-ingredient-form-dialog';
 
 import { DataTable } from '@/ui/data-table';
 
@@ -47,16 +50,28 @@ interface IProps {
 }
 
 const IngredientsDataTable = ({ page, perPage, ingredients }: IProps) => {
+  const [updatingIngredient, setUpdatingIngredient] = useState<Tables<'ingredients'> | undefined>();
+
   const table = useReactTable({
     data: ingredients,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
+  const onTableRowClick = (row: Row<Tables<'ingredients'>>) => {
+    setUpdatingIngredient(row.original);
+  };
+
   return (
     <div className="flex flex-col gap-4 w-full">
-      <DataTable table={table} />
-      <DataTableFooter page={page} perPage={perPage}></DataTableFooter>
+      <UpdateIngredientFormDialog
+        isOpen={!!updatingIngredient}
+        setIsOpen={() => setUpdatingIngredient(undefined)}
+        ingredient={updatingIngredient}
+      />
+
+      <DataTable table={table} onTableRowClick={onTableRowClick} />
+      <DataTableFooter page={page} perPage={perPage} />
     </div>
   );
 };
