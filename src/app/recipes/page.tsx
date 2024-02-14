@@ -1,5 +1,5 @@
-import CreateRecipeFormDialog from '@/module/create-recipe-form-dialog';
-import RecipeDataTable from '@/module/recipe-data-table';
+import CreateRecipeFormDialog from '@/feature/recipes/create-recipe-form-dialog';
+import RecipeDataTable from '@/feature/recipes/recipe-data-table';
 
 import { Button } from '@/ui/button';
 

@@ -1,5 +1,5 @@
-import CreateIngredientFormDialog from '@/module/create-ingredient-form-dialog';
-import IngredientsDataTable from '@/module/ingredient-data-table';
+import CreateIngredientFormDialog from '@/feature/ingredients/create-ingredient-form-dialog';
+import IngredientsDataTable from '@/feature/ingredients/ingredient-data-table';
 
 import { Button } from '@/ui/button';
 import Search from '@/ui/search';

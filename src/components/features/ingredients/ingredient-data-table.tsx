@@ -5,8 +5,9 @@ import { useState } from 'react';
 import { getCoreRowModel, Row, useReactTable } from '@tanstack/react-table';
 import { ColumnDef } from '@tanstack/table-core';
 
+import UpdateIngredientFormDialog from '@/feature/ingredients/update-ingredient-form-dialog';
+
 import DataTableFooter from '@/module/data-table-footer';
-import UpdateIngredientFormDialog from '@/module/update-ingredient-form-dialog';
 
 import { DataTable } from '@/ui/data-table';
 

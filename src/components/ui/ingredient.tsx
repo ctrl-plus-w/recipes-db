@@ -4,7 +4,7 @@ import React, { ChangeEventHandler, Dispatch, SetStateAction, useMemo } from 're
 
 import { RefreshCcwIcon } from 'lucide-react';
 
-import SearchIngredientDialog from '@/module/search-ingredient-dialog';
+import SearchIngredientDialog from '@/feature/ingredients/search-ingredient-dialog';
 
 import { Checkbox } from '@/ui/checkbox';
 import InvisibleInput from '@/ui/invisible-input';

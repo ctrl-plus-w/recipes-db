@@ -4,7 +4,7 @@ import React from 'react';
 
 import { unstable_noStore as noStore } from 'next/cache';
 
-import LoadOriginalIngredients from '@/module/load-original-ingredients-form';
+import LoadOriginalIngredients from '@/feature/ingredients/load-original-ingredients-form';
 
 import {
   AlertDialog,

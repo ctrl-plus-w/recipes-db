@@ -6,10 +6,10 @@ import { redirect } from 'next/navigation';
 
 import { ChevronRightIcon, ExternalLinkIcon, HardDriveDownloadIcon, TrashIcon, UsersRoundIcon } from 'lucide-react';
 
-import CreateIngredientForm from '@/module/create-ingredient-form';
-import DeleteRecipeDialog from '@/module/delete-recipe-dialog';
-import LoadOriginalIngredientsDialog from '@/module/load-original-ingredients-dialog';
-import UpdateRecipeIngredientFormDialog from '@/module/update-recipe-ingredient-form-dialog';
+import CreateIngredientForm from '@/feature/ingredients/create-ingredient-form';
+import LoadOriginalIngredientsDialog from '@/feature/ingredients/load-original-ingredients-dialog';
+import UpdateRecipeIngredientFormDialog from '@/feature/ingredients/update-recipe-ingredient-form-dialog';
+import DeleteRecipeDialog from '@/feature/recipes/delete-recipe-dialog';
 
 import { Badge } from '@/ui/badge';
 
