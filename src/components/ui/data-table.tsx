@@ -31,7 +31,6 @@ export function DataTable<TData>({ table, onTableRowClick }: DataTableProps<TDat
             table.getRowModel().rows.map((row) => (
               <TableRow
                 onClick={() => {
-                  console.log(onTableRowClick);
                   onTableRowClick && onTableRowClick(row);
                 }}
                 data-state={row.getIsSelected() && 'selected'}
