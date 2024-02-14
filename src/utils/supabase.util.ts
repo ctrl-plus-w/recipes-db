@@ -17,8 +17,8 @@ export const getDataOfTable =
         const to = page * perPage;
 
         const { data } = await supabase.from(table).select('*').range(from, to);
-        return data ?? [];
+        return { data: data ?? [], page, perPage };
       } catch (err) {
-        return [];
+        return { data: [], page: 1, perPage: 10 };
       }
     };
