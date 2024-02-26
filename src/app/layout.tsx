@@ -26,6 +26,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <a className="transition-colors hover:text-foreground/80 text-foreground/60" href="/ingredients">
                   Ingrédients
                 </a>
+                <a className="transition-colors hover:text-foreground/80 text-foreground/60" href="/units">
+                  Unités
+                </a>
               </nav>
             </div>
           </div>
