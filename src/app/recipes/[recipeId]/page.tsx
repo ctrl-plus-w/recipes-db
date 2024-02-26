@@ -12,6 +12,7 @@ import UpdateRecipeIngredientFormDialog from '@/feature/ingredients/update-recip
 import DeleteRecipeDialog from '@/feature/recipes/delete-recipe-dialog';
 
 import { Badge } from '@/ui/badge';
+import IngredientQuantity from '@/ui/ingredient-quantity';
 
 import supabase from '@/instance/database';
 
@@ -31,13 +32,13 @@ const getData = async (recipeId: string) => {
 
   const { data: joinIngredients, error: error2 } = await supabase
     .from('recipes__ingredients')
-    .select('quantity, quantity_unit, ingredient:ingredients(*)')
+    .select('quantity, unit:units(*), ingredient:ingredients(*)')
     .eq('recipe_id', recipe.id);
   if (error2) return;
 
   const ingredients = filterNotNull(
-    joinIngredients.map(({ ingredient, quantity, quantity_unit }) =>
-      ingredient ? { ...ingredient, quantity, quantity_unit } : undefined,
+    joinIngredients.map(({ ingredient, quantity, unit }) =>
+      ingredient ? { ...ingredient, quantity, unit } : undefined,
     ),
   );
 
@@ -97,9 +98,7 @@ const RecipePage = async ({ params: { recipeId } }: IProps) => {
               <UpdateRecipeIngredientFormDialog recipe={recipe} ingredient={ingredient} key={ingredient.id}>
                 <button className="flex flex-col items-start py-1 hover:bg-neutral-800">
                   <p>{ingredient.name}</p>
-                  <p className="text-white/70">
-                    {ingredient.quantity ?? '-'} <span>{ingredient.quantity_unit}</span>
-                  </p>
+                  <IngredientQuantity className="text-white/70" ingredient={ingredient} />
                 </button>
               </UpdateRecipeIngredientFormDialog>
             ))}

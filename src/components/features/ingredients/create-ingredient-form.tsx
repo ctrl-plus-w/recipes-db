@@ -1,29 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
-
-import { revalidatePath } from 'next/cache';
+import React, { useEffect, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
 
 import { Button } from '@/ui/button';
-import { Form, NumberFormField, TextFormField } from '@/ui/form';
+import { Form, NumberFormField, SelectFormField, TextFormField } from '@/ui/form';
 import { useToast } from '@/ui/use-toast';
 
 import { RessourceNotFoundError } from '@/class/ApiError';
 
 import supabase from '@/instance/database';
 
-import { Tables } from '@/type/database-generated.types';
+import { Tables, TablesInsert } from '@/type/database-generated.types';
 
 const formSchema = z.object({
   name: z.string().min(2).max(50),
   shelf_life: z.number().min(1),
   opened_shelf_life: z.number().optional(),
   quantity: z.number().optional(),
-  quantity_unit: z.string().optional(),
+  unit_id: z.string().optional(),
 });
 
 const defaultValues = {
@@ -31,16 +29,17 @@ const defaultValues = {
   shelf_life: 1,
   opened_shelf_life: -1,
   quantity: 0,
-  quantity_unit: '',
+  unit_id: '',
 };
 
 interface IProps {
   recipe: Tables<'recipes'>;
 }
 
-const CreateIngredientForm = ({ recipe }: IProps) => {
-  const { toast, toastError } = useToast();
+const CreateIngredientForm = ({ recipe: _ }: IProps) => {
+  const { toastError } = useToast();
 
+  const [units, setUnits] = useState<Tables<'units'>[]>([]);
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -57,49 +56,72 @@ const CreateIngredientForm = ({ recipe }: IProps) => {
     try {
       setIsSubmitLoading(true);
 
+      const ingredientInsertData = {
+        name: values.name,
+        shelf_life: values.shelf_life,
+        opened_shelf_life: values.opened_shelf_life,
+      } satisfies TablesInsert<'ingredients'>;
+
       const { error: error1, data: createdIngredient } = await supabase
         .from('ingredients')
-        .insert({
-          name: values.name,
-          shelf_life: values.shelf_life,
-          opened_shelf_life: values.opened_shelf_life,
-        })
+        .insert(ingredientInsertData)
         .select()
         .single();
 
       if (!createdIngredient) throw new RessourceNotFoundError('Ingredient');
       if (error1) throw error1;
 
-      const { error: error2 } = await supabase.from('recipes__ingredients').insert({
-        ingredient_id: createdIngredient.id,
-        recipe_id: recipe.id,
-        quantity: values.quantity,
-        quantity_unit: values.quantity_unit,
-      });
+      // TODO: Retrieve the unit from the database and associate it with the join link.
+      throw new Error('Please fulfill the TODO.');
 
-      if (error2) throw error2;
-
-      toast({
-        title: "L'ingrédient à été créé et ajouté !",
-        description: (
-          <p>
-            <strong>{values.name}</strong>,{' '}
-            <strong>
-              {values.quantity} {values.quantity_unit}
-            </strong>
-            .
-          </p>
-        ),
-      });
-
-      revalidatePath(`/recipes/${recipe.id}`);
-      form.reset();
+      // const joinTableInsertData = {
+      //   ingredient_id: createdIngredient.id,
+      //   recipe_id: recipe.id,
+      //   quantity: values.quantity,
+      //   // quantity_unit: values.quantity_unit,
+      // } satisfies TablesInsert<'recipes__ingredients'>;
+      //
+      // const { error: error2 } = await supabase.from('recipes__ingredients').insert(joinTableInsertData);
+      //
+      // if (error2) throw error2;
+      //
+      // toast({
+      //   title: "L'ingrédient à été créé et ajouté !",
+      //   description: (
+      //     <p>
+      //       <strong>{values.name}</strong>,{' '}
+      //       <strong>
+      //         {values.quantity}
+      //         {/*{values.quantity_unit}*/}
+      //       </strong>
+      //       .
+      //     </p>
+      //   ),
+      // });
+      //
+      // revalidatePath(`/recipes/${recipe.id}`);
+      // form.reset();
     } catch (err) {
       toastError(err);
     } finally {
       setIsSubmitLoading(false);
     }
   };
+
+  useEffect(() => {
+    const fetchUnits = async () => {
+      try {
+        const { data, error } = await supabase.from('units').select();
+        if (error) throw error;
+
+        setUnits(data);
+      } catch (err) {
+        toastError(err);
+      }
+    };
+
+    fetchUnits().then();
+  }, []);
 
   return (
     <Form {...form}>
@@ -130,7 +152,13 @@ const CreateIngredientForm = ({ recipe }: IProps) => {
 
         <div className="flex gap-4">
           <NumberFormField className="w-full" label="Quantitée" placeholder={0} name="quantity" />
-          <TextFormField className="w-full" label="Unitée" placeholder="g" name="quantity_unit" />
+          <SelectFormField
+            className="w-full"
+            label="Unitée"
+            values={units.map((unit) => ({ value: unit.id, label: unit.singular }))}
+            name="unit"
+            placeholder="Sélectionnez une unitée"
+          />
         </div>
 
         <div className="flex items-center justify-end space-x-4">

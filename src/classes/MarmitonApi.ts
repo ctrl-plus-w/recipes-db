@@ -68,9 +68,16 @@ class Api {
         return {
           id: `ingredient-${index}`,
           name: nameElement.text.trim(),
-          image: null,
+          image_url: null,
           quantity: count,
-          quantity_unit: unit,
+          unit: unit
+            ? {
+                id: `unit-${unit}`,
+                singular: unit,
+                plural: unit,
+                created_at: new Date().toISOString(),
+              }
+            : null,
           shelf_life: null,
           opened_shelf_life: null,
           ts: null,

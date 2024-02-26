@@ -6,6 +6,7 @@ import { Controller, ControllerProps, FieldPath, FieldValues, FormProvider, useF
 
 import { Input } from '@/ui/input';
 import { Label } from '@/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/select';
 
 import { cn } from '@/util/style.util';
 
@@ -59,6 +60,52 @@ const TextFormField = <
           <FormControl>
             <Input placeholder={placeholder} {...field} />
           </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+};
+
+interface ISelectFormFieldProps {
+  className?: string;
+  label: string;
+  placeholder?: string;
+  values: { value: string; label: string }[];
+}
+
+const SelectFormField = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>({
+    className,
+    control,
+    name,
+    values,
+    placeholder,
+    label,
+  }: ISelectFormFieldProps & Pick<ControllerProps<TFieldValues, TName>, 'control' | 'name'>) => {
+  return (
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className={className}>
+          <FormLabel>{label}</FormLabel>
+          <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder={placeholder} />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {values.map(({ value, label }) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <FormMessage />
         </FormItem>
       )}
@@ -236,4 +283,5 @@ export {
   FormField,
   TextFormField,
   NumberFormField,
+  SelectFormField,
 };

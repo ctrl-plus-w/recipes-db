@@ -109,11 +109,13 @@ const LoadOriginalIngredientsForm = ({
 
           const weightedIngredient = weightedIngredientWithAvailabilities[0];
 
+          // TODO : Fetch the unit from the database to fill the field in the recipes ingredients link table
+
           return {
             ingredient_id: ingredient.id,
             recipe_id: recipe.id,
             quantity: weightedIngredient.quantity,
-            quantity_unit: weightedIngredient.quantity_unit,
+            // quantity_unit: weightedIngredient.quantity_unit,
           } satisfies TablesInsert<'recipes__ingredients'>;
         }),
       );

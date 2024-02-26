@@ -7,7 +7,7 @@ export type Database = DatabaseGenerated;
 
 export type WeightedIngredient = Tables<'ingredients'> & {
   quantity: number | null;
-  quantity_unit: string | null;
+  unit: Tables<'units'> | null;
 };
 
 export type RecipeWithWeightedIngredients = Tables<'recipes'> & {

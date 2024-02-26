@@ -7,6 +7,7 @@ import { RefreshCcwIcon } from 'lucide-react';
 import SearchIngredientDialog from '@/feature/ingredients/search-ingredient-dialog';
 
 import { Checkbox } from '@/ui/checkbox';
+import IngredientQuantity from '@/ui/ingredient-quantity';
 import InvisibleInput from '@/ui/invisible-input';
 
 import { capitalizeSentence } from '@/util/string.util';
@@ -100,10 +101,7 @@ const Ingredient = ({
           )}
         </div>
 
-        <p className="text-white/70">
-          {!ingredient.quantity || isNaN(ingredient.quantity) ? '-' : ingredient.quantity}{' '}
-          <span>{ingredient.quantity_unit}</span>
-        </p>
+        <IngredientQuantity className="text-white/70" ingredient={ingredient} />
       </div>
 
       <Checkbox
