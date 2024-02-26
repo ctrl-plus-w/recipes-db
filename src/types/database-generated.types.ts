@@ -1,13 +1,13 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       ingredients: {
         Row: {
           created_at: string;
           id: string;
-          image: string | null;
+          image_url: string | null;
           name: string;
           opened_shelf_life: number | null;
           shelf_life: number | null;
@@ -16,7 +16,7 @@ export type Database = {
         Insert: {
           created_at?: string;
           id?: string;
-          image?: string | null;
+          image_url?: string | null;
           name: string;
           opened_shelf_life?: number | null;
           shelf_life?: number | null;
@@ -25,13 +25,50 @@ export type Database = {
         Update: {
           created_at?: string;
           id?: string;
-          image?: string | null;
+          image_url?: string | null;
           name?: string;
           opened_shelf_life?: number | null;
           shelf_life?: number | null;
           ts?: unknown | null;
         };
         Relationships: [];
+      };
+      products: {
+        Row: {
+          created_at: string | null;
+          id: string;
+          ingredient_id: string;
+          quantity: number;
+          unit_id: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          id?: string;
+          ingredient_id: string;
+          quantity: number;
+          unit_id: string;
+        };
+        Update: {
+          created_at?: string | null;
+          id?: string;
+          ingredient_id?: string;
+          quantity?: number;
+          unit_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'products_ingredient_id_fkey';
+            columns: ['ingredient_id'];
+            referencedRelation: 'ingredients';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'products_unit_id_fkey';
+            columns: ['unit_id'];
+            referencedRelation: 'units';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       recipes: {
         Row: {
@@ -77,39 +114,64 @@ export type Database = {
           created_at: string;
           ingredient_id: string;
           quantity: number | null;
-          quantity_unit: string | null;
           recipe_id: string;
+          unit_id: string | null;
         };
         Insert: {
           created_at?: string;
           ingredient_id: string;
           quantity?: number | null;
-          quantity_unit?: string | null;
           recipe_id: string;
+          unit_id?: string | null;
         };
         Update: {
           created_at?: string;
           ingredient_id?: string;
           quantity?: number | null;
-          quantity_unit?: string | null;
           recipe_id?: string;
+          unit_id?: string | null;
         };
         Relationships: [
           {
             foreignKeyName: 'recipes__ingredients_ingredient_id_fkey';
             columns: ['ingredient_id'];
-            isOneToOne: false;
             referencedRelation: 'ingredients';
             referencedColumns: ['id'];
           },
           {
             foreignKeyName: 'recipes__ingredients_recipe_id_fkey';
             columns: ['recipe_id'];
-            isOneToOne: false;
             referencedRelation: 'recipes';
             referencedColumns: ['id'];
           },
+          {
+            foreignKeyName: 'recipes__ingredients_unit_id_fkey';
+            columns: ['unit_id'];
+            referencedRelation: 'units';
+            referencedColumns: ['id'];
+          },
         ];
+      };
+      units: {
+        Row: {
+          created_at: string | null;
+          id: string;
+          plural: string;
+          singular: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          id?: string;
+          plural: string;
+          singular: string;
+        };
+        Update: {
+          created_at?: string | null;
+          id?: string;
+          plural?: string;
+          singular?: string;
+        };
+        Relationships: [];
       };
     };
     Views: {
@@ -125,7 +187,7 @@ export type Database = {
       [_ in never]: never;
     };
   };
-};
+}
 
 export type Tables<
   PublicTableNameOrOptions extends
