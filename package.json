@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "npm-run-all format eslint check-types",
+    "eslint": "next lint",
+    "format": "prettier --check --write \"src/**/*.{ts,tsx}\"",
+    "check-types": "tsc --noemit"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
