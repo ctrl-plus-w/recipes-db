@@ -26,12 +26,16 @@ import {
   AlertDialogTrigger,
 } from '@/ui/alert-dialog';
 import InvisibleInput from '@/ui/invisible-input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/select';
 import { useToast } from '@/ui/use-toast';
 
 import useUnits from '@/hook/use-units';
 
 import supabase from '@/instance/database';
 
+import { pluralizedUnit } from '@/util/tables.util';
+
+import { TablesUpdate } from '@/type/database-generated.types';
 import { RecipeWithWeightedIngredients, Tables, WeightedIngredient } from '@/type/database.types';
 
 interface IProps {
@@ -115,22 +119,21 @@ const UpdateRecipeIngredientForm = ({ setIsOpen, recipe, ingredient }: IFormProp
 
       const _quantity = quantity <= 0 ? null : quantity;
 
-      // TODO : Retrieve the unit from the database to fill the field in the recipes ingredients link table
-      throw new Error('Please fulfill the TODO.');
+      const updateData = { quantity: _quantity, unit_id: unit?.id } satisfies TablesUpdate<'recipes__ingredients'>;
 
-      // const { error } = await supabase
-      //   .from('recipes__ingredients')
-      //   .update({ quantity: _quantity, quantity_unit: _quantity_unit })
-      //   .eq('recipe_id', recipe.id)
-      //   .eq('ingredient_id', ingredient.id);
-      // if (error) throw error;
-      //
-      // toast({ title: "Modification de l'ingrédient", description: "L'ingrédient à bien été modifié." });
-      //
-      // startTransition(() => {
-      //   setIsOpen(false);
-      //   router.refresh();
-      // });
+      const { error } = await supabase
+        .from('recipes__ingredients')
+        .update(updateData)
+        .eq('recipe_id', recipe.id)
+        .eq('ingredient_id', ingredient.id);
+      if (error) throw error;
+
+      toast({ title: "Modification de l'ingrédient", description: "L'ingrédient à bien été modifié." });
+
+      startTransition(() => {
+        setIsOpen(false);
+        router.refresh();
+      });
     } catch (err) {
       toastError(err);
     } finally {
@@ -140,15 +143,26 @@ const UpdateRecipeIngredientForm = ({ setIsOpen, recipe, ingredient }: IFormProp
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         <InvisibleInput
           value={isNaN(quantity) ? '' : quantity.toString()}
           onChange={onQuantityChange}
           placeholder={ingredient.quantity?.toString() ?? '1'}
         />
 
-        {/* TODO : Fix the invisible input to handle the available units. */}
-        {/*<InvisibleInput value={unit} onChange={onUnitChange} placeholder={ingredient.quantity_unit ?? 'unite'} />*/}
+        <Select value={unit?.id} onValueChange={(value) => setUnit(units.find((_unit) => _unit.id === value) ?? null)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionnez l'unité" />
+          </SelectTrigger>
+
+          <SelectContent>
+            {units.map((unit) => (
+              <SelectItem key={unit.id} value={unit.id}>
+                {pluralizedUnit(unit, quantity)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex items-center justify-end gap-2">

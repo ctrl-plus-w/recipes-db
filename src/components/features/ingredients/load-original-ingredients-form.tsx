@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Dispatch, FormEventHandler, SetStateAction, useEffect, useState } from 'react';
+import React, { Dispatch, FormEventHandler, SetStateAction, useCallback, useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -10,6 +10,8 @@ import { AlertDialogAction, AlertDialogCancel } from '@/ui/alert-dialog';
 import { Button } from '@/ui/button';
 import Ingredient from '@/ui/ingredient';
 import { useToast } from '@/ui/use-toast';
+
+import useUnits from '@/hook/use-units';
 
 import supabase from '@/instance/database';
 
@@ -33,6 +35,7 @@ const LoadOriginalIngredientsForm = ({
 
   const [ingredientsWithAvailabilities, setIngredientsWithAvailabilities] = useState(_ingredientsWithAvailabilities);
 
+  const units = useUnits();
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +43,24 @@ const LoadOriginalIngredientsForm = ({
   const [isReplacementDisabledIds, setIsReplacementDisabledIds] = useState<string[]>([]);
   const [isDisabledIds, setIsDisabledIds] = useState<string[]>([]);
   const [mappedNames, setMappedNames] = useState<Record<string, string>>({});
+
+  const findMatchingUnitFromIngredient = useCallback(
+    ({ unit }: WeightedIngredient) => {
+      if (!unit) return;
+
+      const { singular, plural } = unit;
+
+      return units.find((_unit) => {
+        return (
+          _unit.singular === singular ||
+          _unit.plural === plural ||
+          _unit.aliases.includes(singular) ||
+          _unit.aliases.includes(plural)
+        );
+      });
+    },
+    [units],
+  );
 
   useEffect(() => {
     setIngredientsWithAvailabilities(_ingredientsWithAvailabilities);
@@ -100,24 +121,46 @@ const LoadOriginalIngredientsForm = ({
       const ingredientsToJoin = [...createdIngredients, ...ingredientsToReuse];
 
       const recipesIngredients = filterNotNull(
-        ingredientsToJoin.map((ingredient) => {
-          // ! Careful, the weight are retrieved by the name of the ingredients. That could cause bugs.
-          const weightedIngredientWithAvailabilities = ingredientsWithAvailabilities.find(
-            ([{ name }]) => capitalizeSentence(ingredient.name) === capitalizeSentence(name),
-          );
-          if (!weightedIngredientWithAvailabilities) return;
+        await Promise.all(
+          ingredientsToJoin.map(async (ingredient) => {
+            // ! Careful, the weight are retrieved by the name of the ingredients. That could cause bugs.
+            const weightedIngredientWithAvailabilities = ingredientsWithAvailabilities.find(
+              ([{ name }]) => capitalizeSentence(ingredient.name) === capitalizeSentence(name),
+            );
+            if (!weightedIngredientWithAvailabilities) return;
 
-          const weightedIngredient = weightedIngredientWithAvailabilities[0];
+            const weightedIngredient = weightedIngredientWithAvailabilities[0];
 
-          // TODO : Fetch the unit from the database to fill the field in the recipes ingredients link table
+            // In case there's no unit, no need to try to retrieve it from the database.
+            if (!weightedIngredient.unit)
+              return {
+                ingredient_id: ingredient.id,
+                recipe_id: recipe.id,
+                quantity: weightedIngredient.quantity,
+              } satisfies TablesInsert<'recipes__ingredients'>;
 
-          return {
-            ingredient_id: ingredient.id,
-            recipe_id: recipe.id,
-            quantity: weightedIngredient.quantity,
-            // quantity_unit: weightedIngredient.quantity_unit,
-          } satisfies TablesInsert<'recipes__ingredients'>;
-        }),
+            let unit = findMatchingUnitFromIngredient(weightedIngredient);
+
+            if (!unit) {
+              const insertData = {
+                singular: weightedIngredient.unit.singular,
+                plural: weightedIngredient.unit.plural,
+              } satisfies TablesInsert<'units'>;
+
+              const { data: createdUnit, error } = await supabase.from('units').insert(insertData).select();
+              if (error) console.error(error);
+
+              if (createdUnit && createdUnit.length) unit = createdUnit[0];
+            }
+
+            return {
+              ingredient_id: ingredient.id,
+              recipe_id: recipe.id,
+              quantity: weightedIngredient.quantity,
+              unit_id: unit?.id,
+            } satisfies TablesInsert<'recipes__ingredients'>;
+          }),
+        ),
       );
 
       const { error: error2 } = await supabase.from('recipes__ingredients').insert(recipesIngredients);
@@ -141,6 +184,8 @@ const LoadOriginalIngredientsForm = ({
               ingredient,
               availableIngredients,
               setIngredientsWithAvailabilities,
+
+              matchingUnit: findMatchingUnitFromIngredient(ingredient),
 
               mappedName: mappedNames[ingredient.id],
               setMappedName: setMappedName(ingredient),

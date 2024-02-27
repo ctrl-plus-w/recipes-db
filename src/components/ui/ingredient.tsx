@@ -7,11 +7,11 @@ import { RefreshCcwIcon } from 'lucide-react';
 import SearchIngredientDialog from '@/feature/ingredients/search-ingredient-dialog';
 
 import { Checkbox } from '@/ui/checkbox';
-import IngredientQuantity from '@/ui/ingredient-quantity';
 import InvisibleInput from '@/ui/invisible-input';
 
 import { capitalizeSentence } from '@/util/string.util';
 import { cn } from '@/util/style.util';
+import { ingredientPluralizedUnit, pluralizedUnit } from '@/util/tables.util';
 
 import { Tables, WeightedIngredient } from '@/type/database.types';
 
@@ -21,6 +21,8 @@ interface IProps {
   setIngredientsWithAvailabilities: Dispatch<
     SetStateAction<(readonly [WeightedIngredient, Tables<'ingredients'>[]])[]>
   >;
+
+  matchingUnit?: Tables<'units'>;
 
   mappedName: string | undefined;
   setMappedName: (value: string) => void;
@@ -36,6 +38,7 @@ const Ingredient = ({
   ingredient,
   availableIngredients,
   setIngredientsWithAvailabilities,
+  matchingUnit,
   switchIsReplacedDisabled,
   isReplacedDisabled,
   switchIsDisabled,
@@ -101,7 +104,28 @@ const Ingredient = ({
           )}
         </div>
 
-        <IngredientQuantity className="text-white/70" ingredient={ingredient} />
+        <p className="text-white/70">
+          {!ingredient.quantity || isNaN(ingredient.quantity) ? (
+            '-'
+          ) : (
+            <>
+              <span className={cn(matchingUnit && 'line-through')}>
+                {ingredient.quantity} {ingredientPluralizedUnit(ingredient)}
+              </span>
+              {matchingUnit ? (
+                <>
+                  {' '}
+                  -&gt;{' '}
+                  <span>
+                    {ingredient.quantity} {pluralizedUnit(matchingUnit, ingredient.quantity)}
+                  </span>
+                </>
+              ) : (
+                <></>
+              )}
+            </>
+          )}
+        </p>
       </div>
 
       <Checkbox

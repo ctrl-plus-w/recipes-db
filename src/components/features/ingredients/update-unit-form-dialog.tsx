@@ -16,7 +16,7 @@ import {
   AlertDialogTrigger,
 } from '@/ui/alert-dialog';
 import { Button } from '@/ui/button';
-import { Form, NumberFormField, TextFormField } from '@/ui/form';
+import { Form, TextFormField } from '@/ui/form';
 import { toast, useToast } from '@/ui/use-toast';
 
 import supabase from '@/instance/database';
