@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 
 import { ChevronRightIcon, ExternalLinkIcon, HardDriveDownloadIcon, TrashIcon, UsersRoundIcon } from 'lucide-react';
 
-import CreateIngredientForm from '@/feature/ingredients/create-ingredient-form';
+import CreateRecipeIngredientForm from '@/feature/ingredients/create-recipe-ingredient-form';
 import LoadOriginalIngredientsDialog from '@/feature/ingredients/load-original-ingredients-dialog';
 import UpdateRecipeIngredientFormDialog from '@/feature/ingredients/update-recipe-ingredient-form-dialog';
 import DeleteRecipeDialog from '@/feature/recipes/delete-recipe-dialog';
@@ -86,7 +86,7 @@ const RecipePage = async ({ params: { recipeId } }: IProps) => {
       </div>
 
       <div className="flex flex-col gap-8 w-full">
-        <CreateIngredientForm recipe={recipe} />
+        <CreateRecipeIngredientForm recipe={recipe} />
 
         <div className="flex flex-col flex-grow flex-shrink-0">
           {recipe.ingredients

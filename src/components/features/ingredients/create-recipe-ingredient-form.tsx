@@ -2,17 +2,21 @@
 
 import React, { useEffect, useState } from 'react';
 
+import { revalidatePath } from 'next/cache';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
 
 import { Button } from '@/ui/button';
 import { Form, NumberFormField, SelectFormField, TextFormField } from '@/ui/form';
-import { useToast } from '@/ui/use-toast';
+import { toast, useToast } from '@/ui/use-toast';
 
 import { RessourceNotFoundError } from '@/class/ApiError';
 
 import supabase from '@/instance/database';
+
+import { pluralizedUnit } from '@/util/tables.util';
 
 import { Tables, TablesInsert } from '@/type/database-generated.types';
 
@@ -36,7 +40,7 @@ interface IProps {
   recipe: Tables<'recipes'>;
 }
 
-const CreateIngredientForm = ({ recipe: _ }: IProps) => {
+const CreateRecipeIngredientForm = ({ recipe }: IProps) => {
   const { toastError } = useToast();
 
   const [units, setUnits] = useState<Tables<'units'>[]>([]);
@@ -71,36 +75,40 @@ const CreateIngredientForm = ({ recipe: _ }: IProps) => {
       if (!createdIngredient) throw new RessourceNotFoundError('Ingredient');
       if (error1) throw error1;
 
-      // TODO: Retrieve the unit from the database and associate it with the join link.
-      throw new Error('Please fulfill the TODO.');
+      const unit = units.find((unit) => unit.id === values.unit_id);
+      if (!unit) throw new RessourceNotFoundError('Unit');
 
-      // const joinTableInsertData = {
-      //   ingredient_id: createdIngredient.id,
-      //   recipe_id: recipe.id,
-      //   quantity: values.quantity,
-      //   // quantity_unit: values.quantity_unit,
-      // } satisfies TablesInsert<'recipes__ingredients'>;
-      //
-      // const { error: error2 } = await supabase.from('recipes__ingredients').insert(joinTableInsertData);
-      //
-      // if (error2) throw error2;
-      //
-      // toast({
-      //   title: "L'ingrédient à été créé et ajouté !",
-      //   description: (
-      //     <p>
-      //       <strong>{values.name}</strong>,{' '}
-      //       <strong>
-      //         {values.quantity}
-      //         {/*{values.quantity_unit}*/}
-      //       </strong>
-      //       .
-      //     </p>
-      //   ),
-      // });
-      //
-      // revalidatePath(`/recipes/${recipe.id}`);
-      // form.reset();
+      const joinTableInsertData = {
+        ingredient_id: createdIngredient.id,
+        recipe_id: recipe.id,
+        quantity: values.quantity,
+        unit_id: unit.id,
+      } satisfies TablesInsert<'recipes__ingredients'>;
+
+      const { error: error2 } = await supabase.from('recipes__ingredients').insert(joinTableInsertData);
+
+      if (error2) throw error2;
+
+      toast({
+        title: "L'ingrédient à été créé et ajouté !",
+        description: (
+          <p>
+            <strong>{values.name}</strong>,{' '}
+            {values.quantity ? (
+              <strong>
+                {values.quantity}
+                {pluralizedUnit(unit, values.quantity)}
+              </strong>
+            ) : (
+              '-'
+            )}
+            .
+          </p>
+        ),
+      });
+
+      revalidatePath(`/recipes/${recipe.id}`);
+      form.reset();
     } catch (err) {
       toastError(err);
     } finally {
@@ -174,4 +182,4 @@ const CreateIngredientForm = ({ recipe: _ }: IProps) => {
   );
 };
 
-export default CreateIngredientForm;
+export default CreateRecipeIngredientForm;
