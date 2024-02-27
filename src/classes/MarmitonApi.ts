@@ -75,6 +75,7 @@ class Api {
                 id: `unit-${unit}`,
                 singular: unit,
                 plural: unit,
+                aliases: [],
                 created_at: new Date().toISOString(),
               }
             : null,
