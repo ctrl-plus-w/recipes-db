@@ -70,11 +70,6 @@ const UpdateRecipeIngredientForm = ({ setIsOpen, recipe, ingredient }: IFormProp
     if (num > 0 || isNaN(num)) setQuantity(num);
   };
 
-  const _onUnitChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-    const _unit = units.find((u) => u.id === event.target.value);
-    if (_unit) setUnit(_unit);
-  };
-
   useEffect(() => {
     if (ingredient.quantity) setQuantity(ingredient.quantity);
     if (ingredient.unit) setUnit(ingredient.unit);
