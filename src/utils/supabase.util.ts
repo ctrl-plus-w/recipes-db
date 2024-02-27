@@ -13,9 +13,9 @@ export const getDataOfTable = <TableName extends keyof Database['public']['Table
       const perPage = Math.max(10, typeof rawPerPage === 'string' ? parseInt(rawPerPage) ?? 10 : 10);
 
       const from = (page - 1) * perPage;
-      const to = page * perPage;
+      const to = page * perPage - 1;
 
-      let req = supabase.from(table).select('*').range(from, to);
+      let req = supabase.from(table).select('*').range(from, to).order('created_at');
 
       if (search && typeof search === 'string') req = req.textSearch(column as string, search);
 
