@@ -49,6 +49,7 @@ const LoadOriginalIngredientsForm = ({
   const [isDisabledIds, setIsDisabledIds] = useState<string[]>([]);
 
   // Mapped names are the names to replace the current names of the elements by (only used when creating ingredients).
+  // Mapping the ingredient id with its new name i.e { 'ingredient-id': 'carrot' }
   const [mappedNames, setMappedNames] = useState<Record<string, string>>({});
 
   /**
@@ -108,15 +109,16 @@ const LoadOriginalIngredientsForm = ({
           ([ingredient, availableIngredients]) =>
             isReplacementDisabledIds.includes(ingredient.id) || !availableIngredients.length,
         )
-        .map(
-          ([ingredient]) =>
-            ({
-              name: ingredient.id in mappedNames ? mappedNames[ingredient.id] : capitalizeSentence(ingredient.name),
+        .map(([ingredient]) => ingredient);
+      const ingredientsToCreateData = ingredientsToCreate.map(
+        (ingredient) =>
+          ({
+            name: ingredient.id in mappedNames ? mappedNames[ingredient.id] : capitalizeSentence(ingredient.name),
 
-              opened_shelf_life: ingredient.opened_shelf_life,
-              shelf_life: ingredient.shelf_life,
-            }) satisfies TablesInsert<'ingredients'>,
-        );
+            opened_shelf_life: ingredient.opened_shelf_life,
+            shelf_life: ingredient.shelf_life,
+          }) satisfies TablesInsert<'ingredients'>,
+      );
 
       // Get the list of ingredients to reuse / are already created for previous recipes (all the ingredients that are
       // enabled which are not to be created)
@@ -128,7 +130,7 @@ const LoadOriginalIngredientsForm = ({
 
       const { data: createdIngredients, error: error1 } = await supabase
         .from('ingredients')
-        .insert(ingredientsToCreate)
+        .insert(ingredientsToCreateData)
         .select();
       if (error1) throw error1;
 
@@ -140,9 +142,14 @@ const LoadOriginalIngredientsForm = ({
        * @param ingredient The ingredient to get the weighted ingredient from.
        */
       const getWeightedIngredient = (ingredient: Tables<'ingredients'>) => {
+        // Retrieve the id of the original ingredient from the mapped names
+        const originalIngredientId = Object.keys(mappedNames).find((id) => mappedNames[id] === ingredient.name);
+        const oldName = ingredientsToCreate.find((ingredient) => ingredient.id === originalIngredientId)?.name;
+
         // ! Careful, the weight are retrieved by the name of the ingredients. That could cause bugs.
         const weightedIngredientsWithAvailabilities = ingredientsWithAvailabilities.find(
-          ([{ name }]) => capitalizeSentence(ingredient.name) === capitalizeSentence(name),
+          ([{ name }]) =>
+            capitalizeSentence(ingredient.name) === capitalizeSentence(name) || (oldName && oldName === name),
         );
         if (!weightedIngredientsWithAvailabilities) return;
 
