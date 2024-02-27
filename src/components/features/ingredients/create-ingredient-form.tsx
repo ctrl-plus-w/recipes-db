@@ -154,10 +154,10 @@ const CreateIngredientForm = ({ recipe: _ }: IProps) => {
           <NumberFormField className="w-full" label="Quantitée" placeholder={0} name="quantity" />
           <SelectFormField
             className="w-full"
-            label="Unitée"
+            label="Unité"
             values={units.map((unit) => ({ value: unit.id, label: unit.singular }))}
             name="unit"
-            placeholder="Sélectionnez une unitée"
+            placeholder="Sélectionnez une unité"
           />
         </div>
 
