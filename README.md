@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Recipes DB
 
-## Getting Started
+## Introduction
 
-First, run the development server:
+Recipes DB is a back-office part of a bigger project. The objective of this back-office is to handle the data related to 
+the recipes (recipes, ingredients, units and products). From the interface, you can create, update, delete and list the 
+recipes, ingredients, units and products.
+
+## Technical Stack
+
+The project is based on [Next.js](https://nextjs.org/) and [Supabase](https://supabase.com/). 
+[Docker](https://www.docker.com/) is also used. 
+
+
+## Installation
+
+### Prerequisites
+
+Regardless of the method of installation, you need to have the following `.env` file configured. First, copy the
+`.env.example` file to `.env` and fill in the values.
+
+- `NEXT_PUBLIC_SUPABASE_URL`: The Supabase URL.
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: The Supabase anon key.
+
+Both of the keys can either be retrieved on the supabase dashboard (the dashboard can be accessible locally by running 
+the `supabase start` command in the directory or by accessing the [Supabase website](https://supabase.com/)).
+
+### Docker Image
+The first way to run the project is to use the Docker image. You can build the image with the following command:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+docker build -t recipes-db .
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then, you can run the image with the following command:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+docker run -p 3000:3000 recipes-db 
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Local Installation
 
-## Learn More
+The other way to run the project is to install it locally. First, you need to install the dependencies with the 
+following command : `npm install`. Then, you can run the project with the following commands :
 
-To learn more about Next.js, take a look at the following resources:
+- `npm run dev` : Run the project in development mode.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- `npm run build` : Build the project.
+- `npm run start` : Run the project in production mode.
