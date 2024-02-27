@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { getCoreRowModel, Row, useReactTable } from '@tanstack/react-table';
 import { ColumnDef } from '@tanstack/table-core';
 
-import UpdateIngredientFormDialog from '@/feature/ingredients/update-ingredient-form-dialog';
 import UpdateUnitFormDialog from '@/feature/ingredients/update-unit-form-dialog';
 
 import DataTableFooter from '@/module/data-table-footer';
@@ -30,6 +29,13 @@ const columns: ColumnDef<Tables<'units'>>[] = [
   {
     accessorKey: 'created_at',
     header: 'Date de création',
+  },
+  {
+    accessorKey: 'aliases',
+    header: 'Alias',
+    cell: ({ row }) => {
+      return row.original.aliases.length ? row.original.aliases.join(', ') : '-';
+    },
   },
 ];
 

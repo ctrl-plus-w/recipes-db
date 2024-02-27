@@ -154,18 +154,21 @@ export interface Database {
       };
       units: {
         Row: {
+          aliases: string[];
           created_at: string | null;
           id: string;
           plural: string;
           singular: string;
         };
         Insert: {
+          aliases?: string[];
           created_at?: string | null;
           id?: string;
           plural: string;
           singular: string;
         };
         Update: {
+          aliases?: string[];
           created_at?: string | null;
           id?: string;
           plural?: string;

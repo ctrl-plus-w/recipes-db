@@ -26,11 +26,13 @@ import { Tables, TablesUpdate } from '@/type/database-generated.types';
 const formSchema = z.object({
   singular: z.string().min(2).max(50),
   plural: z.string().min(2).max(50),
+  aliases_txt: z.string().optional(),
 });
 
 const defaultValues = {
   singular: '',
   plural: '',
+  aliases_txt: '',
 };
 
 interface IProps {
@@ -62,15 +64,19 @@ const UpdateUnitForm = ({ unit, close }: IFormProps) => {
   useEffect(() => {
     form.setValue('singular', unit.singular);
     form.setValue('plural', unit.plural);
+    form.setValue('aliases_txt', unit.aliases.join(', '));
   }, [unit]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsSubmitLoading(true);
 
+      const aliases = values.aliases_txt?.split(',').map((alias) => alias.trim()) ?? [];
+
       const updateData = {
         singular: values.singular,
         plural: values.plural,
+        aliases,
       } satisfies TablesUpdate<'units'>;
 
       const { error } = await supabase.from('units').update(updateData).eq('id', unit.id);
@@ -101,6 +107,7 @@ const UpdateUnitForm = ({ unit, close }: IFormProps) => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <TextFormField control={form.control} name="singular" label="Nom (au singulier)" placeholder="gramme" />
         <TextFormField control={form.control} name="plural" label="Nom (au pluriel)" placeholder="grammes" />
+        <TextFormField control={form.control} name="aliases_txt" label="Alias" placeholder="g, kg, mg" />
 
         <div className="flex items-center justify-end space-x-4">
           <Button variant="outline" type="button" onClick={close}>
