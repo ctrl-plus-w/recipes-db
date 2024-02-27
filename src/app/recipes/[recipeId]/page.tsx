@@ -71,7 +71,7 @@ const RecipePage = async ({ params: { recipeId } }: IProps) => {
         </Badge>
 
         <DeleteRecipeDialog recipe={recipe}>
-          <button className="group p-2 ml-auto">
+          <button type="button" className="group p-2 ml-auto">
             <TrashIcon className="group-hover:text-neutral-300 transition-colors duration-300" />
           </button>
         </DeleteRecipeDialog>
@@ -96,7 +96,7 @@ const RecipePage = async ({ params: { recipeId } }: IProps) => {
             })
             .map((ingredient) => (
               <UpdateRecipeIngredientFormDialog recipe={recipe} ingredient={ingredient} key={ingredient.id}>
-                <button className="flex flex-col items-start py-1 hover:bg-neutral-800">
+                <button type="button" className="flex flex-col items-start py-1 hover:bg-neutral-800">
                   <p>{ingredient.name}</p>
                   <IngredientQuantity className="text-white/70" ingredient={ingredient} />
                 </button>

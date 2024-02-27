@@ -21,6 +21,8 @@ module.exports = {
       },
     ],
 
+    'react/button-has-type': 'error',
+
     '@typescript-eslint/no-namespace': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-explicit-any': 'off',

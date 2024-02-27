@@ -96,6 +96,7 @@ const Ingredient = ({
             <button
               onClick={() => switchIsReplacedDisabled()}
               className={cn('text-neutral-200', isReplacedDisabled && 'line-through')}
+              type="button"
             >
               -&gt; {availableIngredients[0].name}
             </button>
