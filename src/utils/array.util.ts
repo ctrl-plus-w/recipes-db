@@ -14,3 +14,7 @@ export const arrayToString = (arr: string[], lang = 'en'): string => {
 export const filterNotNull = <T>(arr: (T | undefined | null)[]): T[] => {
   return arr.filter((el) => el !== undefined && el !== null) as T[];
 };
+
+export const unique = <T>(arr: T[]): T[] => {
+  return Array.from(new Set(arr));
+};

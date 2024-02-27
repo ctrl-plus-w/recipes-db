@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Dispatch, FormEventHandler, SetStateAction, useCallback, useEffect, useState } from 'react';
+import React, { FormEventHandler, useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -15,7 +15,8 @@ import useUnits from '@/hook/use-units';
 
 import supabase from '@/instance/database';
 
-import { filterNotNull } from '@/util/array.util';
+import { filterNotNull, unique } from '@/util/array.util';
+import { switchIsValue } from '@/util/react.util';
 import { capitalizeSentence } from '@/util/string.util';
 
 import { TablesInsert } from '@/type/database-generated.types';
@@ -40,12 +41,22 @@ const LoadOriginalIngredientsForm = ({
 
   const [isLoading, setIsLoading] = useState(false);
 
+  // Replaced ingredients are ingredients that are replaced by another one (shown as struck with an arrow pointing
+  // towards to replacing ingredient.)
   const [isReplacementDisabledIds, setIsReplacementDisabledIds] = useState<string[]>([]);
+
+  // Disabled ingredients are the one not include in the recipe.
   const [isDisabledIds, setIsDisabledIds] = useState<string[]>([]);
+
+  // Mapped names are the names to replace the current names of the elements by (only used when creating ingredients).
   const [mappedNames, setMappedNames] = useState<Record<string, string>>({});
 
-  const findMatchingUnitFromIngredient = useCallback(
-    ({ unit }: WeightedIngredient) => {
+  /**
+   * Composite function to find the matching unit from an ingredient.
+   * @param units The list of units to search in.
+   */
+  const findMatchingUnitFromIngredient = (units: Tables<'units'>[]) => {
+    return ({ unit }: WeightedIngredient) => {
       if (!unit) return;
 
       const { singular, plural } = unit;
@@ -58,21 +69,13 @@ const LoadOriginalIngredientsForm = ({
           _unit.aliases.includes(plural)
         );
       });
-    },
-    [units],
-  );
+    };
+  };
 
   useEffect(() => {
+    // Update the ingredientsWithAvailabilities when the corresponding props update
     setIngredientsWithAvailabilities(_ingredientsWithAvailabilities);
   }, [_ingredientsWithAvailabilities]);
-
-  const switchIsValue =
-    (values: string[], setValues: Dispatch<SetStateAction<string[]>>) => (ingredient: WeightedIngredient) => () => {
-      const id = ingredient.id;
-
-      if (values.includes(id)) setValues((ids) => ids.filter((_id) => _id !== id));
-      else setValues((ids) => [...ids, id]);
-    };
 
   const setMappedName = (ingredient: WeightedIngredient) => (mappedName: string) => {
     setMappedNames((mappedNames) => ({ ...mappedNames, [ingredient.id]: mappedName }));
@@ -87,10 +90,19 @@ const LoadOriginalIngredientsForm = ({
     try {
       setIsLoading(true);
 
+      // Ingredients with availabilities is an array of tuples with the first element of the tuple being a weighted
+      // ingredient and the second element being an array of ingredients (the available elements are elements that got
+      // matched with the full-text search by postgresql).
+      //
+      // Type: (readonly [WeightedIngredient, Tables<'ingredients'>[]])[];
+
+      // Filter out the ingredients that are disabled.
       const enabledIngredientsWithAvailabilities = ingredientsWithAvailabilities.filter(
         ([ingredient]) => !isDisabledIds.includes(ingredient.id),
       );
 
+      // Get the list of ingredients to create (the ones that are enabled AND that are either not replaced or that
+      // don't have any available ingredients).
       const ingredientsToCreate = enabledIngredientsWithAvailabilities
         .filter(
           ([ingredient, availableIngredients]) =>
@@ -106,6 +118,8 @@ const LoadOriginalIngredientsForm = ({
             }) satisfies TablesInsert<'ingredients'>,
         );
 
+      // Get the list of ingredients to reuse / are already created for previous recipes (all the ingredients that are
+      // enabled which are not to be created)
       const ingredientsToReuse = enabledIngredientsWithAvailabilities
         .filter(([ingredient, availableIngredients]) => {
           return availableIngredients.length && !isReplacementDisabledIds.includes(ingredient.id);
@@ -118,40 +132,57 @@ const LoadOriginalIngredientsForm = ({
         .select();
       if (error1) throw error1;
 
+      // Ingredients to join to the recipe (ingredients__recipes table).
       const ingredientsToJoin = [...createdIngredients, ...ingredientsToReuse];
 
+      /**
+       * Get the weighted ingredient from the list of ingredients with availabilities.
+       * @param ingredient The ingredient to get the weighted ingredient from.
+       */
+      const getWeightedIngredient = (ingredient: Tables<'ingredients'>) => {
+        // ! Careful, the weight are retrieved by the name of the ingredients. That could cause bugs.
+        const weightedIngredientsWithAvailabilities = ingredientsWithAvailabilities.find(
+          ([{ name }]) => capitalizeSentence(ingredient.name) === capitalizeSentence(name),
+        );
+        if (!weightedIngredientsWithAvailabilities) return;
+
+        return weightedIngredientsWithAvailabilities[0];
+      };
+
+      // The units insert data. Looking for all the ingredients to join to the recipe and getting the units from them.
+      const unitsInsertData = unique(
+        filterNotNull(
+          ingredientsToJoin.map((ingredient) => {
+            const weightedIngredient = getWeightedIngredient(ingredient);
+            if (!weightedIngredient || !weightedIngredient.unit) return;
+
+            const unit = findMatchingUnitFromIngredient(units)(weightedIngredient);
+            if (unit) return;
+
+            return weightedIngredient.unit.singular;
+          }),
+        ),
+      ).map(
+        (value) =>
+          ({
+            singular: value,
+            plural: value,
+          }) satisfies TablesInsert<'units'>,
+      );
+
+      const { data: createdUnits, error: error2 } = await supabase.from('units').insert(unitsInsertData).select();
+      if (error2) throw error2;
+
+      const combinedUnits = [...units, ...createdUnits];
+
+      // recipes__ingredients table insert data, combining the ingredients, the quantities and the units
       const recipesIngredients = filterNotNull(
         await Promise.all(
           ingredientsToJoin.map(async (ingredient) => {
-            // ! Careful, the weight are retrieved by the name of the ingredients. That could cause bugs.
-            const weightedIngredientWithAvailabilities = ingredientsWithAvailabilities.find(
-              ([{ name }]) => capitalizeSentence(ingredient.name) === capitalizeSentence(name),
-            );
-            if (!weightedIngredientWithAvailabilities) return;
+            const weightedIngredient = getWeightedIngredient(ingredient);
+            if (!weightedIngredient) return;
 
-            const weightedIngredient = weightedIngredientWithAvailabilities[0];
-
-            // In case there's no unit, no need to try to retrieve it from the database.
-            if (!weightedIngredient.unit)
-              return {
-                ingredient_id: ingredient.id,
-                recipe_id: recipe.id,
-                quantity: weightedIngredient.quantity,
-              } satisfies TablesInsert<'recipes__ingredients'>;
-
-            let unit = findMatchingUnitFromIngredient(weightedIngredient);
-
-            if (!unit) {
-              const insertData = {
-                singular: weightedIngredient.unit.singular,
-                plural: weightedIngredient.unit.plural,
-              } satisfies TablesInsert<'units'>;
-
-              const { data: createdUnit, error } = await supabase.from('units').insert(insertData).select();
-              if (error) console.error(error);
-
-              if (createdUnit && createdUnit.length) unit = createdUnit[0];
-            }
+            const unit = findMatchingUnitFromIngredient(combinedUnits)(weightedIngredient);
 
             return {
               ingredient_id: ingredient.id,
@@ -163,8 +194,8 @@ const LoadOriginalIngredientsForm = ({
         ),
       );
 
-      const { error: error2 } = await supabase.from('recipes__ingredients').insert(recipesIngredients);
-      if (error2) throw error2;
+      const { error: error3 } = await supabase.from('recipes__ingredients').insert(recipesIngredients);
+      if (error3) throw error3;
 
       router.refresh();
     } catch (err) {
@@ -185,7 +216,7 @@ const LoadOriginalIngredientsForm = ({
               availableIngredients,
               setIngredientsWithAvailabilities,
 
-              matchingUnit: findMatchingUnitFromIngredient(ingredient),
+              matchingUnit: findMatchingUnitFromIngredient(units)(ingredient),
 
               mappedName: mappedNames[ingredient.id],
               setMappedName: setMappedName(ingredient),
