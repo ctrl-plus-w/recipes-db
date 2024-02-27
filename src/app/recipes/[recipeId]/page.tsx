@@ -56,7 +56,7 @@ const RecipePage = async ({ params: { recipeId } }: IProps) => {
   return (
     <>
       <div className="w-full flex items-center gap-2 text-sm border-b py-4 mb-2">
-        <Link href="/recipes">Recettes</Link>
+        <a href="/recipes">Recettes</a>
         <ChevronRightIcon strokeWidth={2} width={20} height={20} />
         <p>{recipe.title}</p>
       </div>
