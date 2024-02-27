@@ -47,3 +47,9 @@ following command : `npm install`. Then, you can run the project with the follow
 
 - `npm run build` : Build the project.
 - `npm run start` : Run the project in production mode.
+
+
+## Test Recipes
+
+- https://www.marmiton.org/recettes/recette_lasagnes-a-la-bolognaise_18215.aspx
+- https://www.marmiton.org/recettes/recette_pates-a-la-bolognaise-facile_20482.aspx
