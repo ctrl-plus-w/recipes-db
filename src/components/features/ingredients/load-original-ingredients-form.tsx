@@ -20,10 +20,10 @@ import { switchIsValue } from '@/util/react.util';
 import { capitalizeSentence } from '@/util/string.util';
 
 import { TablesInsert } from '@/type/database-generated.types';
-import { Tables, WeightedIngredient } from '@/type/database.types';
+import { RecipeWithWeightedIngredients, Tables, WeightedIngredient } from '@/type/database.types';
 
 interface IProps {
-  recipe: Tables<'recipes'>;
+  recipe: RecipeWithWeightedIngredients;
 
   ingredientsWithAvailabilities: (readonly [WeightedIngredient, Tables<'ingredients'>[]])[];
 }
@@ -134,8 +134,11 @@ const LoadOriginalIngredientsForm = ({
         .select();
       if (error1) throw error1;
 
-      // Ingredients to join to the recipe (ingredients__recipes table).
-      const ingredientsToJoin = [...createdIngredients, ...ingredientsToReuse];
+      // Ingredients to join to the recipe (ingredients__recipes table). Exclude the ingredients that have already been
+      // joined to the recipe.
+      const ingredientsToJoin = [...createdIngredients, ...ingredientsToReuse].filter(
+        ({ id }) => !recipe.ingredients.find(({ id: _id }) => _id === id),
+      );
 
       /**
        * Get the weighted ingredient from the list of ingredients with availabilities.
@@ -148,8 +151,12 @@ const LoadOriginalIngredientsForm = ({
 
         // ! Careful, the weight are retrieved by the name of the ingredients. That could cause bugs.
         const weightedIngredientsWithAvailabilities = ingredientsWithAvailabilities.find(
-          ([{ name }]) =>
-            capitalizeSentence(ingredient.name) === capitalizeSentence(name) || (oldName && oldName === name),
+          ([{ name }, availableIngredients]) =>
+            capitalizeSentence(ingredient.name) === capitalizeSentence(name) ||
+            (oldName && oldName === name) ||
+            // In case the ingredient has been replaced, we need to find the weighted ingredient by the name of the
+            // replacing ingredient.
+            availableIngredients.find(({ name }) => name === ingredient.name),
         );
         if (!weightedIngredientsWithAvailabilities) return;
 
@@ -187,7 +194,10 @@ const LoadOriginalIngredientsForm = ({
         await Promise.all(
           ingredientsToJoin.map(async (ingredient) => {
             const weightedIngredient = getWeightedIngredient(ingredient);
-            if (!weightedIngredient) return;
+            if (!weightedIngredient) {
+              console.error("Couldn't find a weighted ingredient for ingredient :", ingredient);
+              return;
+            }
 
             const unit = findMatchingUnitFromIngredient(combinedUnits)(weightedIngredient);
 
@@ -213,8 +223,8 @@ const LoadOriginalIngredientsForm = ({
   };
 
   return (
-    <form className="flex flex-col gap-1 h-full overflow-hidden" onSubmit={onSubmit}>
-      <div className="h-full overflow-scroll">
+    <form className="flex flex-col gap-1 h-full overflow-y-scroll mt-4" onSubmit={onSubmit}>
+      <div className="h-full overflow-y-scroll px-6">
         {ingredientsWithAvailabilities.map(([ingredient, availableIngredients]) => (
           <Ingredient
             key={ingredient.id}
@@ -238,7 +248,7 @@ const LoadOriginalIngredientsForm = ({
         ))}
       </div>
 
-      <div className="flex justify-end gap-2 mt-4 flex-shrink-0">
+      <div className="flex justify-end gap-2 mt-4 flex-shrink-0 p-6 pt-0">
         <AlertDialogCancel type="button">Annuler</AlertDialogCancel>
         <AlertDialogAction asChild>
           <Button type="submit">{isLoading ? <Loader2Icon className="animate-spin" /> : 'Valider la création'}</Button>
